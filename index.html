@@ -28,16 +28,17 @@
                 <span class="current-score" id="score">0</span>
                 <span class="best-score">🏆 <span id="best">0</span></span>
             </div>
-            <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
-        </div>
-
-        <!-- Bottom: Replay Button -->
-        <div class="bottom-bar">
-            <button id="restart" class="replay-btn">
-                <span class="play-icon">▶</span>
-                <span>Rejouer</span>
+            <button id="menuBtn" class="menu-btn" aria-label="Menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <line x1="4" y1="6" x2="20" y2="6"></line>
+                    <line x1="4" y1="18" x2="20" y2="18"></line>
+                </svg>
             </button>
         </div>
+
+
 
         <!-- Contest Info (shown after game over) -->
         <div class="contest" id="contest">
@@ -51,29 +52,77 @@
     <div id="menuDrawer" class="menu-drawer">
         <div class="drawer-header">
             <h3>Menu</h3>
-            <button id="menuClose" class="close-btn">✕</button>
+            <button id="menuClose" class="close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
         <div class="drawer-content">
             <button id="leaderBtn" class="drawer-item">
-                <span class="item-icon">🏆</span>
+                <span class="item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                        <path d="M4 22h16"></path>
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                    </svg>
+                </span>
                 <span>Classement</span>
             </button>
             <button id="idBtn" class="drawer-item">
-                <span class="item-icon">👤</span>
+                <span class="item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </span>
                 <span>Mon compte</span>
             </button>
             <button id="skinBtn" class="drawer-item">
-                <span class="item-icon">🎨</span>
+                <span class="item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="13.5" cy="6.5" r=".5"></circle>
+                        <circle cx="17.5" cy="10.5" r=".5"></circle>
+                        <circle cx="8.5" cy="7.5" r=".5"></circle>
+                        <circle cx="6.5" cy="12.5" r=".5"></circle>
+                        <path
+                            d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z">
+                        </path>
+                    </svg>
+                </span>
                 <span>Skins</span>
             </button>
             <button id="shareBtn" class="drawer-item">
-                <span class="item-icon">📤</span>
+                <span class="item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                        <polyline points="16 6 12 2 8 6"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                    </svg>
+                </span>
                 <span>Partager</span>
             </button>
             <button id="muteBtn" class="drawer-item">
-                <span class="item-icon">🔈</span>
+                <span class="item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                </span>
                 <span>Son</span>
             </button>
+            <a href="https://savon-yvard.fr/" target="_blank" class="brand-logo">SAVON YVARD</a>
         </div>
     </div>
     <div id="menuOverlay" class="menu-overlay"></div>
@@ -94,7 +143,13 @@
     <!-- Identity / Onboarding Modal -->
     <div id="idModal" class="modal" aria-hidden="true">
         <div class="card">
-            <button id="idClose" class="close-btn" aria-label="Fermer">✕</button>
+            <button id="idClose" class="close-btn" aria-label="Fermer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
             <h2>🎮 Flappy Savon</h2>
             <p class="subtitle">Concours jusqu'au <strong>31 janvier</strong> • Entre dans le Top 3 !</p>
 
@@ -125,17 +180,29 @@
     <!-- Skins Modal -->
     <div id="skinModal" class="modal" aria-hidden="true">
         <div class="card">
+            <button id="skinClose" class="close-btn" aria-label="Fermer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
             <h2>Choisis ton savon</h2>
             <p class="muted">Skins inspirés de ta gamme (couleurs indicatives).</p>
             <div class="skins" id="skins"></div>
-            <div class="actions">
-                <button id="skinClose" class="btn">Fermer</button>
-            </div>
         </div>
     </div>
 
     <!-- Leaderboard -->
     <div id="leader" class="leader">
+        <button id="leaderClose" class="close-btn" aria-label="Fermer"
+            style="top:8px; right:8px; width:24px; height:24px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
         <h3>🏆 Top 10 (concours)</h3>
         <div id="leaderRows"></div>
         <div class="muted" id="leaderMeta"></div>

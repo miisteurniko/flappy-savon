@@ -46,12 +46,7 @@
         Game.flap();
     });
 
-    // Restart button
-    document.getElementById('restart').addEventListener('click', () => {
-        Game.reset();
-        UI.showContest(true);
-        UI.showLeaderboard(false);
-    });
+
 
     // Menu drawer toggle
     const menuDrawer = document.getElementById('menuDrawer');
@@ -91,6 +86,11 @@
                 UI.setLeaderboardError();
             }
         }
+    });
+
+    // Leaderboard close button
+    document.getElementById('leaderClose').addEventListener('click', () => {
+        UI.showLeaderboard(false);
     });
 
     // Skins button

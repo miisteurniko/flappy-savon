@@ -4,14 +4,22 @@
    Mobile-First Fullscreen Design
    ======================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Spinnaker&display=swap');
+
 :root {
-  --bg1: #f5f0e8;
-  --bg2: #ebe4d8;
-  --ink: #1a1a1a;
-  --accent: #1a1a1a;
-  --cream: #f5f0e8;
-  --cream-dark: #d9d0c2;
-  --panel: rgba(255, 255, 255, 0.85);
+  --bg1: #f8f5f1;
+  --bg2: #ede6da;
+  --ink: #2c2420;
+  --accent: #2c2420;
+  --cream: #fffaf4;
+  --cream-dark: #e6e0d6;
+  --panel: rgba(255, 255, 255, 0.92);
+  --shadow-sm: 0 2px 8px rgba(44, 36, 32, 0.04);
+  --shadow-md: 0 8px 24px rgba(44, 36, 32, 0.08);
+  --shadow-lg: 0 16px 40px rgba(44, 36, 32, 0.12);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -34,7 +42,9 @@ body {
   margin: 0;
   background: var(--bg1);
   color: var(--ink);
-  font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Spinnaker', sans-serif;
+  font-size: clamp(14px, 4vw, 16px);
+  line-height: 1.4;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -85,13 +95,13 @@ canvas {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 8px 16px;
-  border-radius: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 8px 20px;
+  border-radius: 99px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .current-score {
@@ -114,60 +124,32 @@ canvas {
 
 .menu-btn {
   pointer-events: auto;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border: 0;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  font-size: 20px;
+  border-radius: 50%;
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .menu-btn:active {
-  transform: scale(0.92);
-  background: rgba(240, 235, 228, 1);
+  transform: scale(0.94);
+  background: #fff;
 }
 
-/* ===== Bottom Bar ===== */
-
-.bottom-bar {
-  position: fixed;
-  bottom: calc(16px + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+.menu-btn svg {
+  color: var(--ink);
+  opacity: 0.8;
 }
 
-.replay-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
-  background: #1a1a1a;
-  color: #fff;
-  border: 0;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
-  transition: all 0.2s;
-}
-
-.replay-btn:active {
-  transform: scale(0.95);
-}
-
-.replay-btn .play-icon {
-  font-size: 14px;
-}
+/* Replay button removed */
 
 /* ===== Contest Banner ===== */
 
@@ -249,33 +231,70 @@ canvas {
   flex: 1;
   padding: 12px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-logo {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.4;
+  margin-top: auto;
+  padding-bottom: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-decoration: none !important;
+  color: var(--ink) !important;
+  transition: opacity 0.2s;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.brand-logo:hover,
+.brand-logo:active,
+.brand-logo:visited {
+  color: var(--ink) !important;
+  opacity: 0.8;
+  text-decoration: none !important;
 }
 
 .drawer-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border: 0;
   background: transparent;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 500;
   color: #1a1a1a;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s;
+  transition: all 0.2s;
+  margin-bottom: 4px;
 }
 
 .drawer-item:hover,
 .drawer-item:active {
   background: var(--cream);
+  transform: translateX(4px);
 }
 
 .drawer-item .item-icon {
-  font-size: 22px;
-  width: 32px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #1a1a1a;
+  opacity: 0.8;
+}
+
+.drawer-item:hover .item-icon {
+  opacity: 1;
 }
 
 /* ===== Buttons ===== */
@@ -284,17 +303,20 @@ canvas {
 
 .rank {
   position: fixed;
-  top: 10px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  top: 68px;
+  right: auto;
+  left: 14px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
   display: none;
   z-index: 15;
-  color: #1a1a1a;
+  color: var(--ink);
+  backdrop-filter: blur(12px);
 }
 
 .rank.good {
@@ -303,8 +325,8 @@ canvas {
 }
 
 #rankLive {
-  top: 10px;
-  left: 10px;
+  top: 68px;
+  left: 14px;
   right: auto;
 }
 
@@ -368,46 +390,53 @@ canvas {
 .card {
   position: relative;
   background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 20px;
-  padding: 24px;
-  min-width: 300px;
-  max-width: min(92vw, 380px);
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 5vw, 32px);
+  width: min(90vw, 380px);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   text-align: center;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 @keyframes popIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(10px);
+    transform: scale(0.95);
   }
 
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
 .close-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
   border: none;
-  background: rgba(0, 0, 0, 0.05);
-  color: #666;
+  background: transparent;
+  color: var(--ink);
+  opacity: 0.6;
   border-radius: 50%;
-  font-size: 16px;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: grid;
   place-items: center;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .close-btn:hover {
@@ -561,19 +590,21 @@ canvas {
 
 .leader {
   position: fixed;
-  top: 108px;
+  top: 110px;
   right: 16px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 10px;
-  min-width: 260px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  min-width: 280px;
   max-height: 70vh;
   overflow: auto;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   display: none;
   z-index: 25;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 .leader h3 {
@@ -632,25 +663,39 @@ canvas {
   }
 }
 
+@media (max-width: 340px) {
+  .skins {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px 12px;
+  }
+}
+
 .swatch {
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 0;
+  padding: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: border-color 0.15s, transform 0.1s;
-  background: var(--cream);
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
 }
 
 .swatch:hover {
-  border-color: rgba(0, 0, 0, 0.25);
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .swatch.active {
-  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px var(--ink);
+  background: var(--cream);
 }
 
 .swatch .dot {
@@ -706,26 +751,29 @@ canvas {
 
 .reminder {
   position: fixed;
-  bottom: 14px;
+  top: 80px;
   left: 50%;
   transform: translateX(-50%);
   display: none;
   gap: 8px;
   align-items: center;
-  background: #fff;
-  border: 1px solid #1a1a1a;
-  border-radius: 12px;
-  padding: 10px 14px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 99px;
+  padding: 8px 20px;
+  box-shadow: var(--shadow-md);
   z-index: 41;
-  animation: slideUp 0.3s ease-out;
-  color: #1a1a1a;
+  animation: slideDown 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--ink);
+  white-space: nowrap;
 }
 
-@keyframes slideUp {
+@keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+    transform: translateX(-50%) translateY(-20px);
   }
 
   to {
@@ -756,25 +804,68 @@ canvas {
 /* ===== Responsive ===== */
 
 @media (max-width: 480px) {
-  .panel {
-    padding: 8px 10px;
-    gap: 6px 8px;
-  }
-
   .btn {
-    padding: 6px 8px;
-    font-size: 13px;
+    padding: 12px 16px;
+    font-size: 14px;
   }
 
   .leader {
-    right: 8px;
-    left: 8px;
+    right: 12px;
+    left: 12px;
     min-width: auto;
+    top: 100px;
+  }
+}
+
+/* Small Phones (iPhone SE, etc.) */
+@media (max-width: 370px) {
+  :root {
+    --radius-lg: 20px;
   }
 
-  .contest {
-    flex-direction: column;
-    gap: 4px;
-    padding: 6px 10px;
+  .card {
+    padding: 20px 16px;
+    width: 94vw;
+  }
+
+  .card h2 {
+    font-size: 20px;
+  }
+
+  .drawer-item {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .menu-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .score-display {
+    padding: 6px 14px;
+  }
+
+  .current-score {
+    font-size: 20px;
+  }
+}
+
+/* Short Screens */
+@media (max-height: 660px) {
+  .card {
+    padding: 16px;
+  }
+
+  .benefits {
+    margin-bottom: 12px;
+  }
+
+  .row {
+    margin: 8px 0;
+  }
+
+  .legal {
+    margin-top: 10px;
   }
 }

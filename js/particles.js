@@ -110,15 +110,26 @@ const Particles = {
         const groundY = H - CONFIG.ground.height;
 
         // Update bubbles
-        for (const b of this.bubbles) {
+        // Update bubbles (iterate backwards to allow removal)
+        for (let i = this.bubbles.length - 1; i >= 0; i--) {
+            const b = this.bubbles[i];
             b.y -= b.vy * dt;
             b.x += Math.sin((b.y + b.r) * 0.02) * 0.2;
             b.alpha -= 0.0008 * dt;
 
+            // Remove dead bubbles
             if (b.y < -20 || b.alpha <= 0) {
-                b.x = this._rand(0, W);
-                b.y = groundY - this._rand(10, 90);
-                b.alpha = this._rand(0.2, 0.6);
+                this.bubbles.splice(i, 1);
+            }
+        }
+
+        // Maintain ambient bubbles (ensure at least 10 exist)
+        if (this.bubbles.length < 10) {
+            if (Math.random() < 0.05) { // Small chance per frame to respawn
+                this.spawnBubble(
+                    this._rand(0, W),
+                    groundY + 20 // Start just below ground or at bottom
+                );
             }
         }
 

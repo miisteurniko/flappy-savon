@@ -146,7 +146,7 @@ const Renderer = {
         // Text
         cx.globalAlpha = 1;
         cx.fillStyle = '#0e1116';
-        cx.font = '800 8px system-ui';
+        cx.font = '800 8px "Spinnaker", sans-serif';
         cx.textAlign = 'center';
         cx.textBaseline = 'middle';
         cx.fillText('SAVON YVARD', 0, 2);
@@ -236,11 +236,11 @@ const Renderer = {
         const H = CONFIG.canvas.height;
 
         cx.save();
-        cx.fillStyle = '#ffffffcc';
-        cx.font = '800 24px system-ui';
+        cx.fillStyle = '#1a1a1a'; // Dark ink for visibility
+        cx.font = '800 24px "Spinnaker", sans-serif';
         cx.textAlign = 'center';
         cx.fillText('Appuie pour jouer', W / 2, H * 0.35);
-        cx.font = '14px system-ui';
+        cx.font = '14px "Spinnaker", sans-serif';
         cx.fillText('Espace / clic = saut', W / 2, H * 0.35 + 26);
         cx.restore();
     },
@@ -256,9 +256,9 @@ const Renderer = {
         cx.fillRect(0, 0, W, H);
         cx.fillStyle = '#fff';
         cx.textAlign = 'center';
-        cx.font = '800 36px system-ui';
+        cx.font = '800 36px "Spinnaker", sans-serif';
         cx.fillText('Perdu !', W / 2, H / 2 - 30);
-        cx.font = '16px system-ui';
+        cx.font = '16px "Spinnaker", sans-serif';
         cx.fillText('Cliquer ou espace pour rejouer', W / 2, H / 2 + 6);
         cx.restore();
     },
@@ -274,9 +274,9 @@ const Renderer = {
         cx.fillRect(0, 0, W, H);
         cx.fillStyle = '#fff';
         cx.textAlign = 'center';
-        cx.font = '800 32px system-ui';
+        cx.font = '800 32px "Spinnaker", sans-serif';
         cx.fillText('⏸ PAUSE', W / 2, H / 2 - 20);
-        cx.font = '14px system-ui';
+        cx.font = '14px "Spinnaker", sans-serif';
         cx.fillText('Appuie sur P pour reprendre', W / 2, H / 2 + 20);
         cx.restore();
     },
