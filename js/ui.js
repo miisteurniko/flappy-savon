@@ -224,7 +224,7 @@ const UI = {
     },
 
     startAsGuest() {
-        localStorage.setItem('pseudo', 'Invité');
+        localStorage.setItem('pseudo', '');
         localStorage.removeItem('email');
         localStorage.setItem('optin_email', '0');
         localStorage.setItem('flappySavonOnboarded', '1');

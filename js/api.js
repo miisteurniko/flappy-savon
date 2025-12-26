@@ -22,7 +22,7 @@ const API = {
         try {
             // Use Supabase for score storage
             await Supabase.upsertScore({
-                pseudo: gameData.pseudo || 'Invité',
+                pseudo: gameData.pseudo || '',
                 email: gameData.email || '',
                 optin: gameData.optin || false,
                 score: gameData.score,

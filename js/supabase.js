@@ -20,7 +20,7 @@ const Supabase = {
     async upsertScore(data) {
         const payload = {
             email: data.email?.toLowerCase().trim() || '',
-            pseudo: data.pseudo?.trim() || 'Invité',
+            pseudo: data.pseudo?.trim() || '',
             score: data.score || 0,
             best: data.best || 0,
             points: data.points || 0,

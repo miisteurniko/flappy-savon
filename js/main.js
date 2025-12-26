@@ -287,7 +287,7 @@
         // Post score and update leaderboard
         try {
             await API.postScore({
-                pseudo: localStorage.getItem('pseudo') || 'Invité',
+                pseudo: localStorage.getItem('pseudo') || '',
                 email: localStorage.getItem('email') || '',
                 optin: localStorage.getItem('optin_email') === '1',
                 score: score,
