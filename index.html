@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="description"
+        content="Jouez à Flappy Savon et tentez de gagner des savons artisanaux Savon Yvard ! Entrez dans le Top 3 du concours." />
+    <meta name="theme-color" content="#0a1016" />
+    <meta property="og:title" content="Flappy Savon – Concours Savon Yvard" />
+    <meta property="og:description" content="Jouez et gagnez des savons artisanaux !" />
+    <meta property="og:type" content="website" />
+    <title>Flappy Savon – Concours Savon Yvard</title>
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+    <div class="wrap">
+        <canvas id="game" width="420" height="700" role="img"
+            aria-label="Jeu Flappy Savon – Utilisez Espace ou cliquez pour sauter"></canvas>
+        <div class="title">Flappy Savon</div>
+
+        <!-- Contest Banner -->
+        <div class="contest" id="contest">
+            <div class="goal">🎯 Objectif : entrer dans le Top 3</div>
+            <div class="count" id="countdown">Fin dans —:—:—</div>
+        </div>
+
+        <!-- HUD Panel -->
+        <div class="hud">
+            <div class="panel">
+                <div>Score: <span id="score" class="stat">0</span></div>
+                <div>Meilleur: <span id="best" class="stat">0</span></div>
+                <div>Points: <span id="points" class="stat">0</span></div>
+                <button id="leaderBtn" class="btn secondary">Classement</button>
+                <button id="skinBtn" class="btn secondary">Skins</button>
+                <button id="idBtn" class="btn secondary">Mon compte</button>
+                <button id="muteBtn" class="btn icon" title="Son on/off">🔈</button>
+                <button id="shareBtn" class="btn secondary">Partager</button>
+                <button id="restart" class="btn">Rejouer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rank Bubbles -->
+    <div id="rank" class="rank">Rang —</div>
+    <div id="rankLive" class="rank" style="display:none">Rang —</div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Guest Reminder -->
+    <div id="reminder" class="reminder">
+        <span>🏆 Inscris-toi pour figer ton score au classement !</span>
+        <button id="reminderBtn" class="btn">S'inscrire</button>
+    </div>
+
+    <!-- Identity / Onboarding Modal -->
+    <div id="idModal" class="modal" aria-hidden="true">
+        <div class="card">
+            <button id="idClose" class="close-btn" aria-label="Fermer">✕</button>
+            <h2>🎮 Flappy Savon</h2>
+            <p class="subtitle">Entre dans le <strong>Top 3</strong> et gagne des lots !</p>
+
+            <div class="benefits">
+                <span>🏆 Classement</span>
+                <span>💾 Score sauvé</span>
+                <span>🎁 Lots</span>
+            </div>
+
+            <div class="row">
+                <input id="pseudo" type="text" placeholder="Ton pseudo" maxlength="24" autocomplete="nickname" />
+            </div>
+            <div class="row">
+                <input id="email" type="email" placeholder="Ton e-mail" autocomplete="email" />
+            </div>
+            <div class="row inline">
+                <input id="optin" type="checkbox" />
+                <label for="optin">J'accepte les e-mails Savon Yvard</label>
+            </div>
+            <button id="idSave" class="btn full">Enregistrer</button>
+            <button id="idSkip" class="skip-link">Jouer en invité →</button>
+            <p class="legal"><a href="https://savon-yvard.fr/politique-de-confidentialite/" target="_blank">Politique de
+                    confidentialité</a></p>
+        </div>
+    </div>
+
+    <!-- Skins Modal -->
+    <div id="skinModal" class="modal" aria-hidden="true">
+        <div class="card">
+            <h2>Choisis ton savon</h2>
+            <p class="muted">Skins inspirés de ta gamme (couleurs indicatives).</p>
+            <div class="skins" id="skins"></div>
+            <div class="actions">
+                <button id="skinClose" class="btn">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div id="leader" class="leader">
+        <h3>🏆 Top 10 (concours)</h3>
+        <div id="leaderRows"></div>
+        <div class="muted" id="leaderMeta"></div>
+    </div>
+
+    <!-- Prize Popup -->
+    <div id="prize" class="prize">
+        <img id="prizeImg" alt="Lot" />
+        <div class="txt" id="prizeTxt"></div>
+    </div>
+
+    <!-- Scripts (order matters) -->
+    <script src="js/config.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
