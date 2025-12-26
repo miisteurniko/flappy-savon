@@ -36,6 +36,9 @@ const UI = {
 
         // Start countdown timer
         this._startCountdown();
+
+        // Initialize tabs
+        this.initTabs();
     },
 
     // Update score display
@@ -117,12 +120,70 @@ const UI = {
         }, 4000);
     },
 
+    // === TABS LOGIC ===
+    initTabs() {
+        const tabs = this.el.idModal.querySelectorAll('.tab-btn');
+        tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Deactivate all
+                tabs.forEach(b => b.classList.remove('active'));
+                this.el.idModal.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Activate clicked
+                btn.classList.add('active');
+                const targetId = `tab-${btn.dataset.tab}`;
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) targetContent.classList.add('active');
+
+                // Special handling
+                if (btn.dataset.tab === 'ranking') {
+                    // Trigger leaderboard fetch
+                    document.getElementById('modalLeaderboard').innerHTML = '<div class="muted">Chargement...</div>';
+                    window.dispatchEvent(new CustomEvent('refresh-leaderboard'));
+                }
+            });
+        });
+    },
+
+    updatePromoTab() {
+        // Fix: Use correct localStorage key (matches main.js)
+        const bestScore = parseInt(localStorage.getItem('flappySavonBest') || '0', 10);
+        const promos = document.querySelectorAll('.promo-item');
+
+        promos.forEach(item => {
+            const threshold = parseInt(item.dataset.threshold, 10);
+            const codeDisplay = item.querySelector('.code-display');
+
+            if (bestScore >= threshold) {
+                item.classList.add('unlocked');
+                // User requested: codes are sent by email, not displayed
+                codeDisplay.innerHTML = 'Envoyé par email ✉️';
+                codeDisplay.title = "Vérifie ta boîte mail !";
+                codeDisplay.style.cursor = "default";
+                codeDisplay.onclick = null;
+            } else {
+                item.classList.remove('unlocked');
+                codeDisplay.textContent = `Bloqué 🔒`;
+                codeDisplay.style.cursor = "default";
+                codeDisplay.onclick = null;
+            }
+        });
+    },
+
     // === IDENTITY MODAL ===
 
-    openIdentityModal() {
+    openIdentityModal(defaultTab = 'register') {
         this.el.pseudoInput.value = localStorage.getItem('pseudo') || '';
         this.el.emailInput.value = localStorage.getItem('email') || '';
         this.el.optinInput.checked = localStorage.getItem('optin_email') === '1';
+
+        // Switch to default tab
+        const tabs = this.el.idModal.querySelectorAll('.tab-btn');
+        const targetBtn = Array.from(tabs).find(b => b.dataset.tab === defaultTab);
+        if (targetBtn) targetBtn.click();
+
+        this.updatePromoTab();
+
         this.el.idModal.classList.add('open');
         this.el.idModal.setAttribute('aria-hidden', 'false');
     },
@@ -198,78 +259,63 @@ const UI = {
     // === LEADERBOARD ===
 
     showLeaderboard(show) {
-        this.el.leader.style.display = show ? 'block' : 'none';
+        // Legacy method, now we use the modal tab
+        if (show) this.openIdentityModal('ranking');
     },
 
     toggleLeaderboard() {
-        const isVisible = this.el.leader.style.display === 'block';
-        this.showLeaderboard(!isVisible);
-        return !isVisible;
+        // Legacy toggle
+        this.openIdentityModal('ranking');
     },
 
     renderLeaderboard(rows, currentEmail) {
-        this.el.leaderRows.innerHTML = '';
+        // Render to the modal container
+        const container = document.getElementById('modalLeaderboard');
+        if (!container) return;
+
+        container.innerHTML = '';
 
         if (!rows || !rows.length) {
-            this.el.leaderRows.innerHTML = '<div class="muted">Aucun score pour le moment.</div>';
+            container.innerHTML = '<div class="muted">Aucun score pour le moment.</div>';
             return;
         }
 
         const emailLower = (currentEmail || '').toLowerCase();
 
-        rows.slice(0, 10).forEach((r, i) => {
+        rows.slice(0, 50).forEach((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
             const isMe = emailLower && (String(r.email || '')).toLowerCase() === emailLower;
 
             const div = document.createElement('div');
             div.className = 'lb-row' + (i === 0 ? ' top1' : '') + (isMe ? ' me' : '');
             div.innerHTML = `
-        <div class="medal">${medal}</div>
-        <div>${this._escapeHtml(r.pseudo || 'Anonyme')}${isMe ? ' <span class="you-badge">Toi</span>' : ''}</div>
-        <div>${r.best ?? r.score ?? 0}</div>
+        <div class="medal">${medal || (i + 1)}</div>
+        <div class="lb-name">${this._escapeHtml(r.pseudo || 'Anonyme')}${isMe ? ' <span class="you-badge">Toi</span>' : ''}</div>
+        <div class="lb-score">${r.best ?? r.score ?? 0}</div>
       `;
-            this.el.leaderRows.appendChild(div);
+            // Need to style lb-row if not already
+            container.appendChild(div);
         });
-
-        this.el.leaderMeta.textContent = 'MAJ: ' + new Date().toLocaleString();
     },
 
     setLeaderboardLoading() {
-        this.el.leaderRows.innerHTML = '<div class="muted">Chargement…</div>';
-        this.el.leaderMeta.textContent = '';
+        const container = document.getElementById('modalLeaderboard');
+        if (container) container.innerHTML = '<div class="muted">Chargement…</div>';
     },
 
     setLeaderboardError() {
-        this.el.leaderRows.innerHTML = '<div class="muted">Impossible de charger le classement.</div>';
+        const container = document.getElementById('modalLeaderboard');
+        if (container) container.innerHTML = '<div class="muted">Impossible de charger le classement.</div>';
     },
 
     // === COUNTDOWN ===
 
     _startCountdown() {
-        this._tickCountdown();
-        setInterval(() => this._tickCountdown(), 1000);
+        // Removed as banner is gone
     },
 
     _tickCountdown() {
-        try {
-            const end = new Date(CONFIG.contest.endDate);
-            const now = new Date();
-            let diff = Math.max(0, end - now);
-
-            const d = Math.floor(diff / 86400000);
-            diff %= 86400000;
-            const h = Math.floor(diff / 3600000);
-            diff %= 3600000;
-            const m = Math.floor(diff / 60000);
-            diff %= 60000;
-            const s = Math.floor(diff / 1000);
-
-            this.el.countdown.textContent = end > now
-                ? `Fin dans ${d}j ${h}h ${m}m ${s}s`
-                : 'Concours terminé';
-        } catch (e) {
-            this.el.countdown.textContent = '';
-        }
+        // Removed
     },
 
     // === MUTE BUTTON ===

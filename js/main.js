@@ -137,13 +137,16 @@
     });
 
     // Identity modal - Save button (saves and closes)
-    document.getElementById('idSave').addEventListener('click', () => {
-        const ok = UI.saveIdentity();
-        if (ok) {
-            localStorage.setItem('flappySavonOnboarded', '1');
-            UI.closeIdentityModal();
-        }
-    });
+    const saveBtn = document.getElementById('idSaveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const ok = UI.saveIdentity();
+            if (ok) {
+                localStorage.setItem('flappySavonOnboarded', '1');
+                UI.closeIdentityModal();
+            }
+        });
+    }
 
     // Identity modal - Close button (X)
     document.getElementById('idClose').addEventListener('click', () => {
@@ -151,12 +154,15 @@
     });
 
     // Identity modal - Skip link (play as guest)
-    document.getElementById('idSkip').addEventListener('click', () => {
-        UI.startAsGuest();
-        localStorage.setItem('flappySavonOnboarded', '1');
-        UI.closeIdentityModal();
-        UI.showToast('Mode invité');
-    });
+    const guestBtn = document.getElementById('idGuestBtn');
+    if (guestBtn) {
+        guestBtn.addEventListener('click', () => {
+            UI.startAsGuest();
+            localStorage.setItem('flappySavonOnboarded', '1');
+            UI.closeIdentityModal();
+            UI.showToast('Mode invité');
+        });
+    }
 
     // Reminder button
     document.getElementById('reminderBtn').addEventListener('click', () => {
@@ -274,8 +280,8 @@
             UI.showReminder(true);
         }
 
-        // Show contest banner
-        UI.showContest(true);
+        // Show contest banner (Removed)
+        // UI.showContest(true);
         UI.showLeaderboard(false);
 
         // Post score and update leaderboard
@@ -338,6 +344,22 @@
     maybeShowOnboarding();
     refreshLeaderboard();
     setInterval(refreshLeaderboard, CONFIG.ui.leaderboardRefresh);
+
+    // Handle Leaderboard Refresh Event from UI tabs
+    window.addEventListener('refresh-leaderboard', async () => {
+        try {
+            const rows = await API.loadLeaderboard();
+            if (rows) {
+                const myEmail = localStorage.getItem('email');
+                UI.renderLeaderboard(rows, myEmail);
+            } else {
+                UI.setLeaderboardError();
+            }
+        } catch (e) {
+            console.error('Leaderboard fetch error:', e);
+            UI.setLeaderboardError();
+        }
+    });
 
     // Start game loop
     requestAnimationFrame(loop);

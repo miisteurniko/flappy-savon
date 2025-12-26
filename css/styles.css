@@ -153,28 +153,7 @@ canvas {
 
 /* ===== Contest Banner ===== */
 
-.contest {
-  position: fixed;
-  bottom: calc(80px + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #1a1a1a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  z-index: 5;
-}
 
-.contest .separator {
-  opacity: 0.3;
-}
 
 /* ===== Menu Drawer ===== */
 
@@ -464,7 +443,9 @@ canvas {
   opacity: 0.7;
 }
 
-.benefits {
+/* ===== Tabs ===== */
+
+.tabs {
   display: flex;
   justify-content: center;
   gap: 8px;
@@ -472,13 +453,119 @@ canvas {
   flex-wrap: wrap;
 }
 
-.benefits span {
-  font-size: 11px;
-  padding: 6px 10px;
-  background: var(--cream);
-  border: 1px solid var(--cream-dark);
+.tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ink);
+  opacity: 0.6;
   border-radius: 20px;
-  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  opacity: 1;
+}
+
+.tab-btn.active {
+  background: var(--cream);
+  border-color: var(--cream-dark);
+  opacity: 1;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Tab Contents ===== */
+
+.prize-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.prize-list li {
+  padding: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prize-list .medal {
+  font-size: 16px;
+}
+
+.promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.promo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg2);
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.promo-item .threshold {
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.promo-item .code-display {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #666;
+}
+
+.promo-item.unlocked .code-display {
+  background: var(--accent);
+  color: #fff;
+  font-weight: bold;
+}
+
+.promo-item .discount {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.modal-leaderboard {
+  max-height: 250px;
+  overflow-y: auto;
+  text-align: left;
 }
 
 .row {
@@ -761,19 +848,31 @@ canvas {
   left: 50%;
   transform: translateX(-50%);
   display: none;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
+  justify-content: center;
   background: var(--panel);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 99px;
-  padding: 8px 20px;
+  border-radius: 24px;
+  padding: 12px 20px;
   box-shadow: var(--shadow-md);
   z-index: 41;
   animation: slideDown 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   color: var(--ink);
-  white-space: nowrap;
+  width: min(92%, 460px);
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .reminder {
+    padding: 10px 16px;
+    border-radius: 20px;
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 @keyframes slideDown {
@@ -790,6 +889,7 @@ canvas {
 
 .reminder span {
   font-size: 13px;
+  line-height: 1.4;
 }
 
 /* ===== Incentive Banner ===== */

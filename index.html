@@ -26,7 +26,16 @@
         <div class="top-bar">
             <div class="score-display">
                 <span class="current-score" id="score">0</span>
-                <span class="best-score">🏆 <span id="best">0</span></span>
+                <span class="best-score"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="vertical-align: -2px;">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                        <path d="M4 22h16" />
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                    </svg> <span id="best">0</span></span>
             </div>
             <button id="menuBtn" class="menu-btn" aria-label="Menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -40,12 +49,6 @@
 
 
 
-        <!-- Contest Info (shown after game over) -->
-        <div class="contest" id="contest">
-            <span>🎯 Top 3</span>
-            <span class="separator">•</span>
-            <span id="countdown">31j restants</span>
-        </div>
     </div>
 
     <!-- Menu Drawer -->
@@ -136,7 +139,15 @@
 
     <!-- Guest Reminder -->
     <div id="reminder" class="reminder">
-        <span>🏆 Inscris-toi pour enregistrer ton score au classement !</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                <path d="M4 22h16" />
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+            </svg> Inscris-toi pour enregistrer ton score au classement !</span>
         <button id="reminderBtn" class="btn">S'inscrire</button>
     </div>
 
@@ -153,25 +164,81 @@
             <h2>🎮 Flappy Savon</h2>
             <p class="subtitle">Concours jusqu'au <strong>31 janvier</strong> • Entre dans le Top 3 !</p>
 
-            <div class="benefits">
-                <span>🏆 Classement</span>
-                <span>🎁 Lots à gagner</span>
-                <span>🎟️ Code promo</span>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="register">Inscription</button>
+                <button class="tab-btn" data-tab="ranking"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="vertical-align: -2px;">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                        <path d="M4 22h16" />
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                    </svg> Classement</button>
+                <button class="tab-btn" data-tab="prizes">🎁 Lots</button>
+                <button class="tab-btn" data-tab="promo">🎟️ Promo</button>
             </div>
 
-            <div class="row">
-                <input id="pseudo" type="text" placeholder="Ton pseudo" maxlength="24" autocomplete="nickname" />
+            <div id="tab-register" class="tab-content active">
+                <div class="row">
+                    <input id="pseudo" type="text" placeholder="Ton pseudo" maxlength="24" autocomplete="nickname" />
+                </div>
+                <div class="row">
+                    <input id="email" type="email" placeholder="Ton e-mail" autocomplete="email" />
+                    <p class="email-hint">📬 Tes récompenses seront envoyées par email</p>
+                </div>
+                <div class="row inline">
+                    <input id="optin" type="checkbox" />
+                    <label for="optin">J'accepte les e-mails Savon Yvard</label>
+                </div>
+                <!-- Action button stays inside the register tab or outside? Usually better inside if it submits the form. 
+                     The original 'Participer' button was outside. I will keep it inside 'register' tab for context, 
+                     or keep it global but change text? 
+                     The 'Participer' button saves identity. It only makes sense in 'register' tab.
+                -->
+                <button id="idSaveBtn" class="btn full">Participer</button>
+                <button id="idGuestBtn" class="skip-link">Jouer sans participer →</button>
             </div>
-            <div class="row">
-                <input id="email" type="email" placeholder="Ton e-mail" autocomplete="email" />
-                <p class="email-hint">📬 Tes récompenses seront envoyées par email</p>
+
+            <div id="tab-ranking" class="tab-content">
+                <div id="modalLeaderboard" class="modal-leaderboard">
+                    <div class="muted">Chargement...</div>
+                </div>
             </div>
-            <div class="row inline">
-                <input id="optin" type="checkbox" />
-                <label for="optin">J'accepte les e-mails Savon Yvard</label>
+
+            <div id="tab-prizes" class="tab-content">
+                <p class="muted" style="margin-bottom: 12px; text-align: center; font-size: 13px;">
+                    📅 <strong>Fin du concours : 31 janvier.</strong><br>
+                    Les lots seront attribués aux 3 meilleurs scores à cette date !
+                </p>
+                <ul class="prize-list">
+                    <li><span class="medal">🥇</span> <strong>Top 1 :</strong> 1 Savon + 1 Shampoing + 1 Déo</li>
+                    <li><span class="medal">🥈</span> <strong>Top 2 :</strong> 1 Savon + 1 Shampoing</li>
+                    <li><span class="medal">🥉</span> <strong>Top 3 :</strong> 1 Savon offert</li>
+                </ul>
             </div>
-            <button id="idSave" class="btn full">Participer</button>
-            <button id="idSkip" class="skip-link">Jouer sans participer →</button>
+
+            <div id="tab-promo" class="tab-content">
+                <div class="promo-list">
+                    <div class="promo-item" data-threshold="10">
+                        <div class="threshold">Passer 10 pts</div>
+                        <div class="code-display">Bloqué 🔒</div>
+                        <div class="discount">-10%</div>
+                    </div>
+                    <div class="promo-item" data-threshold="20">
+                        <div class="threshold">Passer 20 pts</div>
+                        <div class="code-display">Bloqué 🔒</div>
+                        <div class="discount">-15%</div>
+                    </div>
+                    <div class="promo-item" data-threshold="30">
+                        <div class="threshold">Passer 30 pts</div>
+                        <div class="code-display">Bloqué 🔒</div>
+                        <div class="discount">-20%</div>
+                    </div>
+                </div>
+            </div>
+
             <p class="legal"><a href="https://savon-yvard.fr/politique-de-confidentialite/" target="_blank">Politique de
                     confidentialité</a></p>
         </div>
