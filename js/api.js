@@ -1,11 +1,11 @@
 // ========================================
-// Flappy Savon - API Module
+// Flappy Savon - API Module (Supabase)
 // ========================================
 
 const API = {
     _lastLeaderboard: null,
 
-    // Post score to server
+    // Post score to Supabase
     async postScore(gameData) {
         // Rate limit check
         if (!Security.canPostScore()) {
@@ -19,51 +19,28 @@ const API = {
             return false;
         }
 
-        const sessionData = Security.getSessionData();
-        const hash = await Security.generateHash(gameData);
-
-        const payload = {
-            pseudo: gameData.pseudo || 'Invité',
-            email: gameData.email || '',
-            optin_email: gameData.optin || false,
-            score: gameData.score,
-            points: gameData.points,
-            best: gameData.best,
-            elapsed: sessionData.elapsed,
-            seed: sessionData.seed,
-            flaps: sessionData.flaps,
-            checks: sessionData.checks,
-            hash: hash,
-            badges: gameData.badges || [],
-            ts: new Date().toISOString(),
-            ua: navigator.userAgent,
-            v: '0.013' // Version for server-side validation updates
-        };
-
         try {
-            const response = await fetch(CONFIG.api.score, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            // Use Supabase for score storage
+            await Supabase.upsertScore({
+                pseudo: gameData.pseudo || 'Invité',
+                email: gameData.email || '',
+                optin: gameData.optin || false,
+                score: gameData.score,
+                points: gameData.points,
+                best: gameData.best,
+                badges: gameData.badges || []
             });
-
-            return response.ok;
+            return true;
         } catch (e) {
             console.error('[API] Post score failed:', e);
             return false;
         }
     },
 
-    // Load leaderboard
+    // Load leaderboard from Supabase
     async loadLeaderboard() {
         try {
-            const response = await fetch(CONFIG.api.leaderboard, { cache: 'no-store' });
-
-            if (!response.ok) {
-                throw new Error('HTTP ' + response.status);
-            }
-
-            const data = await response.json();
+            const data = await Supabase.getLeaderboard(10);
             this._lastLeaderboard = data;
             return data;
         } catch (e) {

@@ -12,7 +12,7 @@ const CONFIG = {
 
   // Contest settings
   contest: {
-    endDate: '2025-09-15T23:59:59+02:00',
+    endDate: '2025-01-31T23:59:59+01:00',
     top3Goal: 3
   },
 

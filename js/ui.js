@@ -48,9 +48,11 @@ const UI = {
         this.el.best.textContent = best;
     },
 
-    // Update points display
+    // Update points display (optional element)
     updatePoints(points) {
-        this.el.points.textContent = points;
+        if (this.el.points) {
+            this.el.points.textContent = points;
+        }
     },
 
     // Show toast notification

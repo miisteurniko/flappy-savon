@@ -16,6 +16,7 @@
     // ===== Canvas Setup =====
     const canvas = document.getElementById('game');
     Renderer.init(canvas);
+    CanvasResize.init(canvas);
 
     // ===== Initialize Modules =====
     UI.init();
@@ -52,13 +53,33 @@
         UI.showLeaderboard(false);
     });
 
+    // Menu drawer toggle
+    const menuDrawer = document.getElementById('menuDrawer');
+    const menuOverlay = document.getElementById('menuOverlay');
+
+    const openMenu = () => {
+        menuDrawer.classList.add('open');
+        menuOverlay.classList.add('open');
+    };
+
+    const closeMenu = () => {
+        menuDrawer.classList.remove('open');
+        menuOverlay.classList.remove('open');
+    };
+
+    document.getElementById('menuBtn').addEventListener('click', openMenu);
+    document.getElementById('menuClose').addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeMenu);
+
     // Identity button
     document.getElementById('idBtn').addEventListener('click', () => {
+        closeMenu();
         UI.openIdentityModal();
     });
 
     // Leaderboard button
     document.getElementById('leaderBtn').addEventListener('click', async () => {
+        closeMenu();
         const shown = UI.toggleLeaderboard();
         if (shown) {
             UI.setLeaderboardLoading();
@@ -74,6 +95,7 @@
 
     // Skins button
     document.getElementById('skinBtn').addEventListener('click', () => {
+        closeMenu();
         UI.openSkinsModal(skinId, (id, name) => {
             skinId = id;
             localStorage.setItem('flappySavonSkin', id);
@@ -88,6 +110,7 @@
 
     // Mute button
     document.getElementById('muteBtn').addEventListener('click', () => {
+        closeMenu();
         const muted = Audio.toggle();
         UI.updateMuteButton(muted);
         UI.showToast(muted ? 'Son coupé' : 'Son activé');
@@ -95,6 +118,7 @@
 
     // Share button
     document.getElementById('shareBtn').addEventListener('click', async () => {
+        closeMenu();
         const url = location.href;
         const txt = `Je viens de faire ${Game.getScore()} sur Flappy Savon Yvard ! ${url}`;
 

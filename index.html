@@ -3,10 +3,13 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="description"
         content="Jouez à Flappy Savon et tentez de gagner des savons artisanaux Savon Yvard ! Entrez dans le Top 3 du concours." />
-    <meta name="theme-color" content="#0a1016" />
+    <meta name="theme-color" content="#f5f0e8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta property="og:title" content="Flappy Savon – Concours Savon Yvard" />
     <meta property="og:description" content="Jouez et gagnez des savons artisanaux !" />
     <meta property="og:type" content="website" />
@@ -18,29 +21,62 @@
     <div class="wrap">
         <canvas id="game" width="420" height="700" role="img"
             aria-label="Jeu Flappy Savon – Utilisez Espace ou cliquez pour sauter"></canvas>
-        <div class="title">Flappy Savon</div>
 
-        <!-- Contest Banner -->
-        <div class="contest" id="contest">
-            <div class="goal">🎯 Objectif : entrer dans le Top 3</div>
-            <div class="count" id="countdown">Fin dans —:—:—</div>
+        <!-- Top Bar: Score + Menu -->
+        <div class="top-bar">
+            <div class="score-display">
+                <span class="current-score" id="score">0</span>
+                <span class="best-score">🏆 <span id="best">0</span></span>
+            </div>
+            <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
         </div>
 
-        <!-- HUD Panel -->
-        <div class="hud">
-            <div class="panel">
-                <div>Score: <span id="score" class="stat">0</span></div>
-                <div>Meilleur: <span id="best" class="stat">0</span></div>
-                <div>Points: <span id="points" class="stat">0</span></div>
-                <button id="leaderBtn" class="btn secondary">Classement</button>
-                <button id="skinBtn" class="btn secondary">Skins</button>
-                <button id="idBtn" class="btn secondary">Mon compte</button>
-                <button id="muteBtn" class="btn icon" title="Son on/off">🔈</button>
-                <button id="shareBtn" class="btn secondary">Partager</button>
-                <button id="restart" class="btn">Rejouer</button>
-            </div>
+        <!-- Bottom: Replay Button -->
+        <div class="bottom-bar">
+            <button id="restart" class="replay-btn">
+                <span class="play-icon">▶</span>
+                <span>Rejouer</span>
+            </button>
+        </div>
+
+        <!-- Contest Info (shown after game over) -->
+        <div class="contest" id="contest">
+            <span>🎯 Top 3</span>
+            <span class="separator">•</span>
+            <span id="countdown">31j restants</span>
         </div>
     </div>
+
+    <!-- Menu Drawer -->
+    <div id="menuDrawer" class="menu-drawer">
+        <div class="drawer-header">
+            <h3>Menu</h3>
+            <button id="menuClose" class="close-btn">✕</button>
+        </div>
+        <div class="drawer-content">
+            <button id="leaderBtn" class="drawer-item">
+                <span class="item-icon">🏆</span>
+                <span>Classement</span>
+            </button>
+            <button id="idBtn" class="drawer-item">
+                <span class="item-icon">👤</span>
+                <span>Mon compte</span>
+            </button>
+            <button id="skinBtn" class="drawer-item">
+                <span class="item-icon">🎨</span>
+                <span>Skins</span>
+            </button>
+            <button id="shareBtn" class="drawer-item">
+                <span class="item-icon">📤</span>
+                <span>Partager</span>
+            </button>
+            <button id="muteBtn" class="drawer-item">
+                <span class="item-icon">🔈</span>
+                <span>Son</span>
+            </button>
+        </div>
+    </div>
+    <div id="menuOverlay" class="menu-overlay"></div>
 
     <!-- Rank Bubbles -->
     <div id="rank" class="rank">Rang —</div>
@@ -60,12 +96,12 @@
         <div class="card">
             <button id="idClose" class="close-btn" aria-label="Fermer">✕</button>
             <h2>🎮 Flappy Savon</h2>
-            <p class="subtitle">Entre dans le <strong>Top 3</strong> et gagne des lots !</p>
+            <p class="subtitle">Concours jusqu'au <strong>31 janvier</strong> • Entre dans le Top 3 !</p>
 
             <div class="benefits">
                 <span>🏆 Classement</span>
-                <span>💾 Score sauvé</span>
-                <span>🎁 Lots</span>
+                <span>🎁 Lots à gagner</span>
+                <span>🎟️ Code promo</span>
             </div>
 
             <div class="row">
@@ -73,13 +109,14 @@
             </div>
             <div class="row">
                 <input id="email" type="email" placeholder="Ton e-mail" autocomplete="email" />
+                <p class="email-hint">📬 Tes récompenses seront envoyées ici</p>
             </div>
             <div class="row inline">
                 <input id="optin" type="checkbox" />
                 <label for="optin">J'accepte les e-mails Savon Yvard</label>
             </div>
-            <button id="idSave" class="btn full">Enregistrer</button>
-            <button id="idSkip" class="skip-link">Jouer en invité →</button>
+            <button id="idSave" class="btn full">Participer</button>
+            <button id="idSkip" class="skip-link">Jouer sans participer →</button>
             <p class="legal"><a href="https://savon-yvard.fr/politique-de-confidentialite/" target="_blank">Politique de
                     confidentialité</a></p>
         </div>
@@ -116,6 +153,8 @@
     <script src="js/audio.js"></script>
     <script src="js/particles.js"></script>
     <script src="js/renderer.js"></script>
+    <script src="js/resize.js"></script>
+    <script src="js/supabase.js"></script>
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
