@@ -170,6 +170,11 @@
         UI.openIdentityModal();
     });
 
+    // Reminder close button
+    document.getElementById('reminderClose').addEventListener('click', () => {
+        UI.showReminder(false);
+    });
+
     // Auto-fill pseudo from email
     document.getElementById('email').addEventListener('input', () => {
         const pseudoInput = document.getElementById('pseudo');

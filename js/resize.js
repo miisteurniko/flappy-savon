@@ -27,22 +27,19 @@ const CanvasResize = {
         }
     },
 
-    // Resize canvas to fill screen while maintaining aspect ratio
+    // Resize canvas to fill entire screen (cover mode)
     resize() {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
 
-        // Calculate scale to fit screen
+        // Calculate scale to COVER screen (fill entirely, may crop)
         const scaleX = vw / this._baseWidth;
         const scaleY = vh / this._baseHeight;
-        this._scale = Math.min(scaleX, scaleY);
+        this._scale = Math.max(scaleX, scaleY); // Changed from min to max for cover
 
-        // Set canvas display size (CSS)
-        const displayWidth = Math.floor(this._baseWidth * this._scale);
-        const displayHeight = Math.floor(this._baseHeight * this._scale);
-
-        this._canvas.style.width = displayWidth + 'px';
-        this._canvas.style.height = displayHeight + 'px';
+        // Set canvas display size to fill viewport
+        this._canvas.style.width = vw + 'px';
+        this._canvas.style.height = vh + 'px';
 
         // Keep internal resolution for crisp rendering
         // (The canvas element's width/height attributes stay the same)
