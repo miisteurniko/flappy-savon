@@ -191,6 +191,16 @@ const UI = {
         });
     },
 
+    // Programmatically switch tab
+    switchToTab(tabName) {
+        const tabs = this.el.idModal.querySelectorAll('.tab-btn');
+        tabs.forEach(b => {
+            if (b.dataset.tab === tabName) {
+                b.click();
+            }
+        });
+    },
+
     updatePromoTab() {
         // Fix: Use correct localStorage key (matches main.js)
         const bestScore = parseInt(localStorage.getItem('flappySavonBest') || '0', 10);
@@ -417,32 +427,33 @@ const UI = {
     },
 
     _tickCountdown() {
-        // Always get fresh reference (modal might not exist at init)
-        const el = document.getElementById('countdown');
-        if (!el) {
-            console.warn('[Countdown] Element not found');
-            return;
-        }
+        const els = document.querySelectorAll('.countdown-timer');
+        if (els.length === 0) return;
 
         // January 31, 2026 at 23:59:59 local time
-        const endDate = new Date(2026, 0, 31, 23, 59, 59); // Month is 0-indexed
+        const endDate = new Date(2026, 0, 31, 23, 59, 59);
         const now = new Date();
         const diff = endDate - now;
 
+        let text = '';
         if (diff <= 0) {
-            el.textContent = 'Terminé !';
-            return;
-        }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-        if (days > 0) {
-            el.textContent = `Fin dans ${days}j ${hours}h`;
+            text = 'Terminé !';
         } else {
-            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            el.textContent = `Fin dans ${hours}h ${mins}m`;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+            if (days > 0) {
+                text = `Fin dans ${days}j ${hours}h`;
+            } else {
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                text = `Fin dans ${hours}h ${mins}m`;
+            }
         }
+
+        els.forEach(el => {
+            // Preserve icon if it exists outside? No, just replace text.
+            el.textContent = text;
+        });
     },
 
     // === MUTE BUTTON ===

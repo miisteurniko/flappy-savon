@@ -87,6 +87,28 @@
         }
     });
 
+    // Countdown bar (opens Prizes tab)
+    const countdownBar = document.getElementById('countdownBar');
+    if (countdownBar) {
+        countdownBar.addEventListener('click', () => {
+            closeMenu();
+            UI.openIdentityModal('prizes');
+        });
+    }
+
+    // Go to Ranking Button (in Prizes tab)
+    const goToRankingBtn = document.getElementById('goToRankingBtn');
+    if (goToRankingBtn) {
+        goToRankingBtn.addEventListener('click', () => {
+            UI.switchToTab('ranking');
+            // Ensure leaderboard loads if it hasn't already or refresh it
+            UI.setLeaderboardLoading();
+            API.loadLeaderboard().then(rows => {
+                if (rows) UI.renderLeaderboard(rows, localStorage.getItem('email'));
+            });
+        });
+    }
+
     // Leaderboard close button
     document.getElementById('leaderClose').addEventListener('click', () => {
         UI.showLeaderboard(false);

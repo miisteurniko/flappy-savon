@@ -49,10 +49,7 @@
             </button>
         </div>
 
-        <!-- Discreet countdown at bottom -->
-        <div class="countdown-bar" id="countdownBar">
-            <span id="countdown">Fin dans --j</span>
-        </div>
+
 
     </div>
 
@@ -141,6 +138,25 @@
                 </span>
                 <span>Installer l'app</span>
             </button>
+            <div id="countdownBar" class="drawer-item"
+                style="background: #2c2420; color: #fff; cursor: pointer; border: 1px solid #d4a037; box-shadow: 0 4px 12px rgba(212, 160, 55, 0.2);">
+                <span class="item-icon" style="color: #d4a037;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                        <path d="M4 22h16" />
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                    </svg>
+                </span>
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span
+                        style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #d4a037; font-weight: bold;">Concours</span>
+                    <span class="countdown-timer" style="font-size: 14px;">Fin dans --j</span>
+                </div>
+            </div>
             <a href="https://savon-yvard.fr/" target="_blank" class="drawer-item"
                 style="text-decoration: none; color: inherit;">
                 <span class="item-icon">
@@ -156,7 +172,7 @@
 
             <p
                 style="margin-top: 20px; font-style: italic; font-size: 13px; color: #8d7b6f; text-align: center; padding: 0 10px;">
-                "La vie est une belle bulle : éphémère, mais brillante."
+                "La vie est une bulle : éphémère, mais brillante."
             </p>
 
             <a href="https://savon-yvard.fr/" target="_blank" class="brand-logo">SAVON YVARD</a>
@@ -232,7 +248,7 @@
                 </svg>
             </button>
             <h2>🎮 Flappy Savon</h2>
-            <p class="subtitle"><span id="countdown">⏳ -- jours</span> • Entre dans le Top 3 !</p>
+            <p class="subtitle">⏳ <span class="countdown-timer">-- jours</span> • Entre dans le Top 3 !</p>
 
             <div class="tabs">
                 <button class="tab-btn active" data-tab="register">Inscription</button>
@@ -271,41 +287,59 @@
                 <button id="idGuestBtn" class="skip-link">Jouer sans participer →</button>
             </div>
 
-            <div id="tab-ranking" class="tab-content">
-                <div id="modalLeaderboard" class="modal-leaderboard">
-                    <div class="muted">Chargement...</div>
+            <div id="tab-ranking" class="tab-content" style="text-align: center;">
+                <h3 style="margin: 10px 0 5px; font-size: 16px; color: #2c2420;">🏆 Classement Général</h3>
+                <p class="muted" style="margin-bottom: 20px; font-size: 13px;">
+                    Les 3 premiers gagnent des cadeaux ! 🎁
+                </p>
+                <div id="modalLeaderboard" class="modal-leaderboard" style="text-align: left;">
+                    <div class="muted" style="text-align: center;">Chargement...</div>
                 </div>
             </div>
 
-            <div id="tab-prizes" class="tab-content">
-                <p class="muted" style="margin-bottom: 12px; text-align: center; font-size: 13px;">
-                    📅 <strong>Fin du concours : 31 janvier.</strong><br>
-                    Les lots seront attribués aux 3 meilleurs scores à cette date !
-                </p>
-                <ul class="prize-list">
+            <div id="tab-prizes" class="tab-content" style="text-align: center;">
+                <h3 style="margin: 10px 0 20px; font-size: 16px; color: #2c2420;">🏆 3 Gagnants le 31 Janvier</h3>
+                <ul class="prize-list" style="text-align: left; display: inline-block;">
                     <li><span class="medal">🥇</span> <strong>Top 1 :</strong> 1 Savon + 1 Shampoing + 1 Déo</li>
                     <li><span class="medal">🥈</span> <strong>Top 2 :</strong> 1 Savon + 1 Shampoing</li>
                     <li><span class="medal">🥉</span> <strong>Top 3 :</strong> 1 Savon offert</li>
                 </ul>
+                <div style="margin-top: 25px;">
+                    <button id="goToRankingBtn" class="btn primary" style="padding: 10px 20px; font-size: 14px;">
+                        🏆 Voir le classement
+                    </button>
+                </div>
             </div>
 
-            <div id="tab-promo" class="tab-content">
+            <div id="tab-promo" class="tab-content" style="text-align: center;">
+                <h3 style="margin: 10px 0 5px; font-size: 16px; color: #2c2420;">🎟️ Débloque des réductions</h3>
+                <p class="muted" style="margin-bottom: 20px; font-size: 13px;">
+                    Atteins ces scores pour recevoir tes codes<br>directement par email ! 📧
+                </p>
+
                 <div class="promo-list">
                     <div class="promo-item" data-threshold="10">
-                        <div class="threshold">Passer 10 pts</div>
-                        <div class="code-display">Bloqué 🔒</div>
+                        <div class="threshold">Score > 10</div>
                         <div class="discount">-10%</div>
+                        <div class="code-display">Bloqué 🔒</div>
                     </div>
                     <div class="promo-item" data-threshold="20">
-                        <div class="threshold">Passer 20 pts</div>
-                        <div class="code-display">Bloqué 🔒</div>
+                        <div class="threshold">Score > 20</div>
                         <div class="discount">-15%</div>
+                        <div class="code-display">Bloqué 🔒</div>
                     </div>
                     <div class="promo-item" data-threshold="30">
-                        <div class="threshold">Passer 30 pts</div>
-                        <div class="code-display">Bloqué 🔒</div>
+                        <div class="threshold">Score > 30</div>
                         <div class="discount">-20%</div>
+                        <div class="code-display">Bloqué 🔒</div>
                     </div>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <a href="https://savon-yvard.fr/" target="_blank" class="btn primary"
+                        style="padding: 10px 20px; font-size: 14px; text-decoration: none; display: inline-block;">
+                        🛍️ Visiter la boutique
+                    </a>
                 </div>
             </div>
 
