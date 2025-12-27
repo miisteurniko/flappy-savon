@@ -398,9 +398,9 @@ const Renderer = {
         cx.fillStyle = this._cachedGradient;
         this._roundRect(-w / 2, -h / 2, w, h, 10, true);
 
-        // Top highlight (wet/glossy look)
-        cx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-        this._roundRect(-w / 2 + 4, -h / 2 + 3, w - 8, h * 0.3, 5, true);
+        // Top highlight (wet/glossy look) - smaller
+        cx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        this._roundRect(-w / 2 + 6, -h / 2 + 4, w - 12, h * 0.22, 4, true);
 
 
         // Text with slight shadow

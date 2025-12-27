@@ -376,6 +376,39 @@
         </div>
     </div>
 
+    <!-- Stats Modal -->
+    <div id="statsModal" class="modal" aria-hidden="true">
+        <div class="card">
+            <button id="statsClose" class="close-btn" aria-label="Fermer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h2 style="text-align: center; margin-bottom: 20px;">📊 Mes Statistiques</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="statGames">0</span>
+                    <span class="stat-label">Parties jouées</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="statBest">0</span>
+                    <span class="stat-label">Meilleur score</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="statPoints">0</span>
+                    <span class="stat-label">Points totaux</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="statBadges">0</span>
+                    <span class="stat-label">Badges débloqués</span>
+                </div>
+            </div>
+            <div id="statsBadgesList" style="margin-top: 16px; text-align: center;"></div>
+        </div>
+    </div>
+
     <!-- Leaderboard -->
     <div id="leader" class="leader">
         <button id="leaderClose" class="close-btn" aria-label="Fermer"

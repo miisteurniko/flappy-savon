@@ -73,6 +73,17 @@
     document.getElementById('menuClose').addEventListener('click', closeMenu);
     menuOverlay.addEventListener('click', closeMenu);
 
+    // Stats modal - click on score to open
+    document.querySelector('.score-display').addEventListener('click', (e) => {
+        e.stopPropagation();
+        UI.openStatsModal();
+    });
+
+    // Stats modal - close button
+    document.getElementById('statsClose').addEventListener('click', () => {
+        UI.closeStatsModal();
+    });
+
     // Identity button
     document.getElementById('idBtn').addEventListener('click', () => {
         closeMenu();

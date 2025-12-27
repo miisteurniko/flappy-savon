@@ -385,6 +385,41 @@ const UI = {
         if (container) container.innerHTML = '<div class="muted">Impossible de charger le classement.</div>';
     },
 
+    // === STATS MODAL ===
+
+    openStatsModal() {
+        const modal = document.getElementById('statsModal');
+        if (!modal) return;
+
+        // Populate stats from localStorage
+        document.getElementById('statGames').textContent = localStorage.getItem('flappySavonGames') || '0';
+        document.getElementById('statBest').textContent = localStorage.getItem('flappySavonBest') || '0';
+        document.getElementById('statPoints').textContent = localStorage.getItem('flappySavonPoints') || '0';
+
+        // Count badges
+        const badges = JSON.parse(localStorage.getItem('flappyBadges') || '{}');
+        const badgeCount = Object.keys(badges).length;
+        document.getElementById('statBadges').textContent = badgeCount;
+
+        // Show badge emojis
+        const badgesList = document.getElementById('statsBadgesList');
+        if (badgesList) {
+            const badgeEmojis = Object.values(badges).join(' ');
+            badgesList.textContent = badgeEmojis || '🔒 Aucun badge encore';
+        }
+
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+    },
+
+    closeStatsModal() {
+        const modal = document.getElementById('statsModal');
+        if (modal) {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    },
+
     // === SOCIAL SHARE ===
 
     async shareScore(score, best) {
