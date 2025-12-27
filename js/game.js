@@ -104,13 +104,7 @@ const Game = {
 
     // Update game logic
     update(dt) {
-        // Update theme transition
-        const nextTheme = this._getThemeForScore(this.state.score);
-        if (nextTheme.id !== this.theme.current.id) {
-            this.theme.previous = this.theme.current;
-            this.theme.current = nextTheme;
-            this.theme.transition = 0;
-        }
+        // Theme transition logic moved to score update for performance
         if (this.theme.transition < 1) {
             this.theme.transition = Math.min(1, this.theme.transition + 0.02 * dt);
         }
@@ -131,8 +125,9 @@ const Game = {
 
         // Recycle pipes
         if (this.state.pipes.length && this.state.pipes[0].x + CONFIG.pipes.width < 0) {
-            this.state.pipes.shift();
-            this._addPipe(this.state.pipes[this.state.pipes.length - 1].x + CONFIG.pipes.spacing);
+            const reusedPipe = this.state.pipes.shift();
+            const lastPipeX = this.state.pipes[this.state.pipes.length - 1].x;
+            this._addPipe(lastPipeX + CONFIG.pipes.spacing, reusedPipe);
         }
 
         // Update soap physics
@@ -160,8 +155,15 @@ const Game = {
                 p.passed = true;
                 this.state.score++;
                 Security.recordPipe(this.state.score);
-                Particles.splash(this.soap.x, this.soap.y);
-                Particles.adjustForTheme(this.theme.current);
+                // Particles.splash REMOVED for performance
+                // Check for theme update
+                const nextTheme = this._getThemeForScore(this.state.score);
+                if (nextTheme.id !== this.theme.current.id) {
+                    this.theme.previous = this.theme.current;
+                    this.theme.current = nextTheme;
+                    this.theme.transition = 0;
+                }
+
                 Audio.score();
                 return 'score';
             }
@@ -184,8 +186,8 @@ const Game = {
         Audio.hit();
     },
 
-    // Add a new pipe
-    _addPipe(x) {
+    // Add a new pipe (or recycle existing)
+    _addPipe(x, reusedPipe = null) {
         const margin = 60;
         const H = CONFIG.canvas.height;
         const groundH = CONFIG.ground.height;
@@ -195,7 +197,15 @@ const Game = {
         const topH = Math.max(margin, Math.min(maxTop, this._rand(margin, maxTop)));
         const bottomY = topH + gap;
 
-        this.state.pipes.push({ x, topH, bottomY, passed: false });
+        if (reusedPipe) {
+            reusedPipe.x = x;
+            reusedPipe.topH = topH;
+            reusedPipe.bottomY = bottomY;
+            reusedPipe.passed = false;
+            this.state.pipes.push(reusedPipe);
+        } else {
+            this.state.pipes.push({ x, topH, bottomY, passed: false });
+        }
     },
 
     // Check collision with pipe

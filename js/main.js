@@ -247,14 +247,7 @@
     }
 
     function updateLiveRank() {
-        const leaderboard = API.getLastLeaderboard();
-        if (leaderboard) {
-            const email = localStorage.getItem('email');
-            const rank = API.computeRank(leaderboard, email, best);
-            if (rank) {
-                UI.setLiveRank(rank, !email);
-            }
-        }
+        // Disabled by user request
     }
 
     function handleDeath() {
@@ -273,6 +266,22 @@
         if (score > previousBest && score > 0) {
             Particles.spawnConfetti();
             UI.showToast('🎉 Nouveau record !');
+        }
+
+        // Check for skin unlocks
+        for (const s of CONFIG.skins) {
+            if (s.unlockAt > 0 && previousBest < s.unlockAt && best >= s.unlockAt) {
+                setTimeout(() => {
+                    UI.showUnlock(s, () => {
+                        // User clicked 'Equip'
+                        skinId = s.id;
+                        localStorage.setItem('flappySavonSkin', s.id);
+                        UI.showToast(`✨ ${s.name} équipé !`);
+                        Particles.spawnConfetti();
+                    });
+                    Particles.spawnConfetti();
+                }, 1000); // reduced delay for better impact
+            }
         }
 
         // Track games played
@@ -322,6 +331,23 @@
     // ===== Onboarding =====
 
     function maybeShowOnboarding() {
+        const hasSkin = !!localStorage.getItem('flappySavonSkin');
+        if (!hasSkin) {
+            // First run: Force skin selection
+            setTimeout(() => {
+                UI.openSkinsModal('ortie', (id, name) => {
+                    skinId = id;
+                    localStorage.setItem('flappySavonSkin', id);
+                    UI.showToast('Skin choisi : ' + name);
+                    checkIdentityOnboarding();
+                });
+            }, 100);
+            return;
+        }
+        checkIdentityOnboarding();
+    }
+
+    function checkIdentityOnboarding() {
         const hasId = !!(
             localStorage.getItem('pseudo') &&
             localStorage.getItem('email') &&
@@ -330,7 +356,8 @@
         const done = localStorage.getItem('flappySavonOnboarded') === '1';
 
         if (!hasId && !done) {
-            UI.openIdentityModal();
+            // Small delay to ensure layout is stable
+            setTimeout(() => UI.openIdentityModal(), 100);
         }
     }
 

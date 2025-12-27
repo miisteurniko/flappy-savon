@@ -3,8 +3,7 @@
 // ========================================
 
 const Audio = {
-    _ctx: null,
-    _muted: false,
+    _gainNode: null,
 
     // Initialize audio context
     init() {
@@ -16,30 +15,39 @@ const Audio = {
         if (!this._ctx) {
             try {
                 this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Create shared master gain node for performance
+                this._gainNode = this._ctx.createGain();
+                this._gainNode.gain.value = 0.04;
+                this._gainNode.connect(this._ctx.destination);
             } catch (e) {
                 console.warn('Audio not supported');
             }
         }
+        // Resume if suspended (browser policy)
+        if (this._ctx && this._ctx.state === 'suspended') {
+            this._ctx.resume();
+        }
     },
 
-    // Play a tone
-    _tone(freq, dur = 0.08, type = 'sine', gain = 0.03) {
-        if (this._muted || !this._ctx) return;
+    // Play a tone (optimized)
+    _tone(freq, dur = 0.08, type = 'sine') {
+        if (this._muted || !this._ctx || !this._gainNode) return;
 
         try {
             const osc = this._ctx.createOscillator();
-            const gainNode = this._ctx.createGain();
-
             osc.type = type;
             osc.frequency.value = freq;
-            gainNode.gain.value = gain;
 
-            osc.connect(gainNode);
-            gainNode.connect(this._ctx.destination);
+            // Connect directly to master gain (no per-sound gain node)
+            osc.connect(this._gainNode);
 
             const now = this._ctx.currentTime;
             osc.start(now);
             osc.stop(now + dur);
+
+            // Cleanup on end (garbage collection of oscillator is handled by browser audio thread mostly)
+            osc.onended = () => osc.disconnect();
         } catch (e) {
             // Ignore audio errors
         }
@@ -47,16 +55,16 @@ const Audio = {
 
     // Sound effects
     flap() {
-        this._tone(880, 0.05, 'square', 0.035);
+        this._tone(880, 0.05, 'square');
     },
 
     score() {
-        this._tone(660, 0.06, 'sine', 0.045);
-        setTimeout(() => this._tone(990, 0.06, 'sine', 0.04), 60);
+        this._tone(660, 0.06, 'sine');
+        setTimeout(() => this._tone(990, 0.06, 'sine'), 60);
     },
 
     hit() {
-        this._tone(120, 0.15, 'sawtooth', 0.05);
+        this._tone(120, 0.15, 'sawtooth');
     },
 
     // Toggle mute

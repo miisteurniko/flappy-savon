@@ -31,7 +31,13 @@ const UI = {
             emailInput: document.getElementById('email'),
             optinInput: document.getElementById('optin'),
             skinModal: document.getElementById('skinModal'),
-            skinsEl: document.getElementById('skins')
+            skinsEl: document.getElementById('skins'),
+            // Unlock Modal
+            unlockModal: document.getElementById('unlockModal'),
+            unlockIcon: document.getElementById('unlockIcon'),
+            unlockName: document.getElementById('unlockName'),
+            equipBtn: document.getElementById('equipBtn'),
+            unlockClose: document.getElementById('unlockClose')
         };
 
         // Start countdown timer
@@ -40,6 +46,59 @@ const UI = {
         // Initialize tabs
         this.initTabs();
     },
+
+    // ... (existing code) ...
+
+    // === UNLOCK MODAL ===
+
+    showUnlock(skin, onEquip) {
+        // Set content
+        this.el.unlockName.textContent = skin.name;
+
+        // Style icon with skin gradient
+        this.el.unlockIcon.style.background = `linear-gradient(45deg, ${skin.c1}, ${skin.c2})`;
+        this.el.unlockIcon.style.webkitBackgroundClip = 'text';
+        this.el.unlockIcon.style.webkitTextFillColor = 'transparent';
+        this.el.unlockIcon.innerText = '🧼'; // Solid soap char filled with gradient
+        // Fallback or better styling? 
+        // Actually, simpler: make it a circle with the gradient
+        this.el.unlockIcon.style.background = `linear-gradient(45deg, ${skin.c1}, ${skin.c2})`;
+        this.el.unlockIcon.style.webkitTextFillColor = 'initial'; // Reset
+        this.el.unlockIcon.style.width = '80px';
+        this.el.unlockIcon.style.height = '80px';
+        this.el.unlockIcon.style.borderRadius = '50%';
+        this.el.unlockIcon.style.display = 'grid';
+        this.el.unlockIcon.style.placeItems = 'center';
+        this.el.unlockIcon.style.margin = '0 auto 20px';
+        this.el.unlockIcon.style.color = '#fff';
+        this.el.unlockIcon.style.textShadow = '0 2px 4px rgba(0,0,0,0.2)';
+
+        // Handlers
+        this.el.equipBtn.onclick = () => {
+            if (onEquip) onEquip();
+            this.closeUnlockModal();
+        };
+
+        this.el.unlockClose.onclick = () => {
+            this.closeUnlockModal();
+        };
+
+        // Show
+        this.el.unlockModal.classList.add('open', 'unlocking');
+        this.el.unlockModal.setAttribute('aria-hidden', 'false');
+
+        // Remove animation class after plays
+        setTimeout(() => {
+            this.el.unlockModal.classList.remove('unlocking');
+        }, 1000);
+    },
+
+    closeUnlockModal() {
+        this.el.unlockModal.classList.remove('open');
+        this.el.unlockModal.setAttribute('aria-hidden', 'true');
+    },
+
+    // === TABS LOGIC ===
 
     // Update score display
     updateScore(score) {
@@ -69,27 +128,14 @@ const UI = {
         }, CONFIG.ui.toastDuration);
     },
 
-    // Show rank bubble
+    // Show rank bubble (Removed)
     showRank(rank) {
-        if (!rank) return;
-
-        this.el.rankBubble.textContent = 'Rang ' + rank + (rank <= 3 ? ' – bravo!' : '');
-        this.el.rankBubble.classList.toggle('good', rank <= 3);
-        this.el.rankBubble.style.display = 'block';
-
-        clearTimeout(this._rankTimeout);
-        this._rankTimeout = setTimeout(() => {
-            this.el.rankBubble.style.display = 'none';
-        }, CONFIG.ui.rankDisplayDuration);
+        // Feature disabled
     },
 
-    // Set live rank display
+    // Set live rank display (Removed)
     setLiveRank(rank, isGuest) {
-        if (!rank) return;
-
-        this.el.rankLive.textContent = 'Rang ' + rank;
-        this.el.rankLive.classList.toggle('guest', !!isGuest);
-        this.el.rankLive.style.display = 'block';
+        // Feature disabled
     },
 
     // Show/hide contest banner
@@ -232,20 +278,41 @@ const UI = {
 
     // === SKINS MODAL ===
 
+    // === SKINS MODAL ===
+
     openSkinsModal(currentSkinId, onSelect) {
         this.el.skinsEl.innerHTML = '';
 
+        // Get best score for unlocking
+        const bestScore = parseInt(localStorage.getItem('flappySavonBest') || '0', 10);
+
         for (const s of CONFIG.skins) {
+            const isLocked = (s.unlockAt || 0) > bestScore;
+
             const el = document.createElement('div');
-            el.className = 'swatch' + (s.id === currentSkinId ? ' active' : '');
-            el.innerHTML = `
-        <div class="dot" style="background:linear-gradient(45deg,${s.c1},${s.c2})"></div>
-        <div>${s.name}</div>
-      `;
-            el.onclick = () => {
-                onSelect(s.id, s.name);
-                this.closeSkinsModal();
-            };
+            // Add 'locked' class if locked
+            el.className = 'swatch' + (s.id === currentSkinId ? ' active' : '') + (isLocked ? ' locked' : '');
+
+            // Content
+            if (isLocked) {
+                el.innerHTML = `
+                    <div class="dot" style="background:#ddd">🔒</div>
+                    <div><small>Score ${s.unlockAt}</small></div>
+                `;
+                // No click handler
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            } else {
+                el.innerHTML = `
+                    <div class="dot" style="background:linear-gradient(45deg,${s.c1},${s.c2})"></div>
+                    <div>${s.name}</div>
+                `;
+                el.onclick = () => {
+                    onSelect(s.id, s.name);
+                    this.closeSkinsModal();
+                };
+            }
+
             this.el.skinsEl.appendChild(el);
         }
 

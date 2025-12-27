@@ -18,9 +18,10 @@ const ASSETS_TO_CACHE = [
     '/js/api.js',
     '/js/supabase.js',
     '/js/security.js',
-    '/assets/soap.png',
-    '/assets/pipe.png',
-    '/assets/bg.png'
+    '/js/pwa.js',
+    '/assets/icon-192.png',
+    '/assets/icon-512.png',
+    '/manifest.json'
 ];
 
 // Install - cache assets

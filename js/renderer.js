@@ -34,22 +34,23 @@ const Renderer = {
         this._ctx.clearRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
     },
 
-    // Draw background with theme transition
+    // Draw background (optimized - no gradient loop)
     drawBackground(prevTheme, currentTheme, themeTrans) {
         const cx = this._ctx;
         const W = CONFIG.canvas.width;
         const H = CONFIG.canvas.height;
 
-        // Mix colors for transition
-        const bg1 = this._mixColor(prevTheme.bg1, currentTheme.bg1, themeTrans);
-        const bg2 = this._mixColor(prevTheme.bg2, currentTheme.bg2, themeTrans);
-
-        // Gradient background
-        const g = cx.createLinearGradient(0, 0, 0, H);
-        g.addColorStop(0, bg1);
-        g.addColorStop(1, bg2);
-        cx.fillStyle = g;
+        // Draw current theme background solid
+        cx.fillStyle = currentTheme.bg1;
         cx.fillRect(0, 0, W, H);
+
+        // Transition overlay (if needed)
+        if (themeTrans < 1) {
+            cx.globalAlpha = 1 - themeTrans;
+            cx.fillStyle = prevTheme.bg1;
+            cx.fillRect(0, 0, W, H);
+            cx.globalAlpha = 1;
+        }
     },
 
     // Draw ground (static - no animation for performance)
@@ -88,11 +89,8 @@ const Renderer = {
                 const bottomH = Math.max(20, H - groundH - bottomY);
                 cx.drawImage(this._obstacleImg, px, bottomY, PIPE_W, bottomH);
             } else {
-                // Kraft paper style
-                const g1 = cx.createLinearGradient(0, 0, 0, H);
-                g1.addColorStop(0, '#d5b48a');
-                g1.addColorStop(1, '#b78b5f');
-                cx.fillStyle = g1;
+                // Kraft paper style (solid color)
+                cx.fillStyle = '#c6a076';
 
                 this._roundRect(px, 0, PIPE_W, topH, 12, true);
                 this._roundRect(px, bottomY, PIPE_W, H - groundH - bottomY, 12, true);
@@ -119,21 +117,45 @@ const Renderer = {
         cx.translate(Math.round(x), Math.round(y));
         cx.rotate(rot);
 
-        // Solid color soap (no gradient for performance)
-        cx.fillStyle = skin.c1;
-        this._roundRect(-w / 2, -h / 2, w, h, 12, true);
+        // 1. Drop shadow (soft, reduced)
+        cx.shadowColor = 'rgba(0,0,0,0.08)'; // Was 0.15
+        cx.shadowBlur = 6;                   // Was 10
+        cx.shadowOffsetY = 2;                // Was 4
 
-        // Highlight
-        cx.globalAlpha = 0.5;
-        cx.fillStyle = '#ffffff';
-        this._roundRect(-w / 2 + 6, -h / 2 + 6, w - 12, 6, 4, true);
+        // 2. Body Gradient (simulating 3D volume)
+        // Light comes from top-left
+        const grad = cx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+        grad.addColorStop(0, skin.c1); // Light color top-left
+        grad.addColorStop(1, skin.c2); // Dark color bottom-right
+        cx.fillStyle = grad;
 
-        // Text
-        cx.globalAlpha = 1;
-        cx.fillStyle = '#0e1116';
+        this._roundRect(-w / 2, -h / 2, w, h, 14, true);
+
+        // Reset shadow for internal details
+        cx.shadowColor = 'transparent';
+        cx.shadowBlur = 0;
+        cx.shadowOffsetY = 0;
+
+        // 3. Highlight (Glossy / Wet look)
+        // Subtler, top-left curve
+        cx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        this._roundRect(-w / 2 + 4, -h / 2 + 4, w - 8, h * 0.4, 6, true);
+
+        // 4. Engraved Text Effect ("SAVON YVARD")
         cx.font = '800 8px Spinnaker, sans-serif';
         cx.textAlign = 'center';
         cx.textBaseline = 'middle';
+
+        // Engraving highlight (bottom-right)
+        cx.fillStyle = 'rgba(255,255,255,0.4)';
+        cx.fillText('SAVON YVARD', 0.5, 2.5);
+
+        // Engraving shadow (top-left)
+        cx.fillStyle = 'rgba(0,0,0,0.2)';
+        cx.fillText('SAVON YVARD', -0.5, 1.5);
+
+        // Main text color
+        cx.fillStyle = '#2c2420'; // Dark ink
         cx.fillText('SAVON YVARD', 0, 2);
 
         cx.restore();
@@ -144,6 +166,8 @@ const Renderer = {
         const cx = this._ctx;
 
         for (const b of bubbles) {
+            if (!b.active) continue; // Skip inactive particles
+
             cx.globalAlpha = b.alpha;
             cx.fillStyle = '#e0f0ff';
             cx.beginPath();
@@ -159,57 +183,17 @@ const Renderer = {
         cx.globalAlpha = 1;
     },
 
-    // Draw leaves
-    drawLeaves(leaves, themeId) {
-        const cx = this._ctx;
-        cx.save();
-
-        for (const f of leaves) {
-            cx.translate(f.x, f.y);
-            cx.rotate(f.rot);
-            cx.fillStyle = themeId === 'atelier' ? '#7ecb80' : '#6fbf73';
-            cx.beginPath();
-            cx.ellipse(0, 0, f.w, f.h, 0, 0, Math.PI * 2);
-            cx.fill();
-            cx.setTransform(1, 0, 0, 1, 0, 0);
-        }
-
-        cx.restore();
-    },
-
-    // Draw steam particles
-    drawSteam(steam, hasFog) {
-        if (!hasFog) return;
-
-        const cx = this._ctx;
-        cx.save();
-
-        for (const s of steam) {
-            cx.globalAlpha = s.a;
-            const grad = cx.createRadialGradient(s.x, s.y, 1, s.x, s.y, s.r);
-            grad.addColorStop(0, '#ffffffaa');
-            grad.addColorStop(1, '#ffffff00');
-            cx.fillStyle = grad;
-            cx.beginPath();
-            cx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            cx.fill();
-        }
-
-        cx.globalAlpha = 1;
-        cx.restore();
-    },
-
-    // Draw confetti
+    // Draw confetti (new record only)
     drawConfetti(confetti) {
         const cx = this._ctx;
 
         for (const c of confetti) {
-            cx.save();
-            cx.translate(c.x, c.y);
-            cx.rotate(c.r);
+            if (!c.active) continue; // Skip inactive particles
+
             cx.fillStyle = c.col;
-            cx.fillRect(-2, -2, 4, 4);
-            cx.restore();
+            cx.beginPath();
+            cx.arc(Math.round(c.x), Math.round(c.y), c.r, 0, Math.PI * 2);
+            cx.fill();
         }
     },
 

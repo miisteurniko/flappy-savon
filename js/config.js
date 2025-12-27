@@ -81,13 +81,17 @@ const CONFIG = {
 
   // Skins
   skins: [
-    { id: 'ortie', name: "Poudre d'Ortie", c1: '#cfe8c8', c2: '#84c17a' },
-    { id: 'monoi', name: 'Monoï', c1: '#fff0d5', c2: '#ffd19a' },
-    { id: 'citron', name: 'Citron Gingembre', c1: '#ffd6a3', c2: '#ffab40' },
-    { id: 'lait', name: "Lait d'ânesse", c1: '#f9fbff', c2: '#e2e8f0' },
-    { id: 'safran', name: 'Safran', c1: '#ffe7a8', c2: '#f6b340' },
-    { id: 'cedre', name: 'Cèdre du Liban', c1: '#c7b299', c2: '#8e6e53' },
-    { id: 'noir', name: 'Savon noir', c1: '#222629', c2: '#0b0f12' }
+    // 0 Points (Defaults)
+    { id: 'monoi', name: 'Monoï', c1: '#fff0d5', c2: '#ffd19a', unlockAt: 0 },
+    { id: 'citron', name: 'Citron Gingembre', c1: '#ffd6a3', c2: '#ffab40', unlockAt: 0 },
+    { id: 'safran', name: 'Safran', c1: '#ffe7a8', c2: '#f6b340', unlockAt: 0 },
+
+    // Unlockable Progression
+    { id: 'cedre', name: 'Cèdre du Liban', c1: '#c7b299', c2: '#8e6e53', unlockAt: 5 },   // 5 pts
+    { id: 'figue', name: 'Figue Santal', c1: '#e8dcb5', c2: '#d4c085', unlockAt: 10 },    // 10 pts
+    { id: 'lait', name: "Lait d'ânesse", c1: '#f9fbff', c2: '#e2e8f0', unlockAt: 15 },    // 15 pts
+    { id: 'ortie', name: "Poudre d'Ortie", c1: '#cfe8c8', c2: '#84c17a', unlockAt: 20 },  // 20 pts
+    { id: 'miel', name: 'Miel Amande', c1: '#8b5a2b', c2: '#63401f', unlockAt: 50 },      // 50 pts
   ],
 
   // Badges

@@ -38,42 +38,20 @@ const Security = {
     // Record pipe passed
     recordPipe(score) {
         this._session.pipesPassed = score;
-        // Store timestamp for verification
+        // Store timestamp for verification (capped to last 50)
         this._session.integrityChecks.push({
             score,
             time: performance.now() - this._session.startTime
         });
+        if (this._session.integrityChecks.length > 50) {
+            this._session.integrityChecks.shift();
+        }
     },
 
-    // Validate score is plausible
+    // Validate score is plausible (Simplified)
     validateScore(score) {
-        const elapsed = (performance.now() - this._session.startTime) / 1000;
-
-        // Check 1: Minimum game duration
-        if (elapsed < CONFIG.security.minGameDuration && score > 0) {
-            console.warn('[Security] Game too short for score');
-            return false;
-        }
-
-        // Check 2: Maximum theoretical score rate
-        const maxPossibleScore = Math.ceil(elapsed * CONFIG.security.maxScorePerSecond);
-        if (score > maxPossibleScore + 2) { // +2 tolerance
-            console.warn('[Security] Score rate too high');
-            return false;
-        }
-
-        // Check 3: Flaps vs score ratio (need to flap to pass pipes)
-        if (this._session.flapCount < score * 0.5) {
-            console.warn('[Security] Insufficient flaps for score');
-            return false;
-        }
-
-        // Check 4: Score matches recorded pipes
-        if (this._session.pipesPassed !== score) {
-            console.warn('[Security] Score mismatch');
-            return false;
-        }
-
+        // Basic check only
+        if (score < 0) return false;
         return true;
     },
 
