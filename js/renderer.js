@@ -94,8 +94,11 @@ const Renderer = {
 
     // Update animation time
     tick(dt) {
+        // Smooth decor update: Clamp dt to max 1.5 to prevent visual bumps on input
+        const smoothDt = Math.min(dt, 1.5);
+
         this._t++;
-        this._gridOffset += 0.15 * dt;
+        this._gridOffset += 0.15 * smoothDt;
         if (this._gridOffset > 32) this._gridOffset -= 32;
 
         // Decay shake
@@ -119,7 +122,7 @@ const Renderer = {
         } else {
             // Move clouds (parallax)
             // Move at 10% of game speed for depth
-            const cloudSpeed = CONFIG.physics.scrollSpeed * 0.1 * dt;
+            const cloudSpeed = CONFIG.physics.scrollSpeed * 0.1 * smoothDt;
             for (const c of this._clouds) {
                 c.x -= cloudSpeed;
                 if (c.x + c.w < 0) {
@@ -131,7 +134,7 @@ const Renderer = {
 
 
         // 2. Animate Hills (Parallax - very slow)
-        const hillSpeed = CONFIG.physics.scrollSpeed * 0.05 * dt;
+        const hillSpeed = CONFIG.physics.scrollSpeed * 0.05 * smoothDt;
         for (const h of this._hills) {
             h.x -= hillSpeed;
         }
