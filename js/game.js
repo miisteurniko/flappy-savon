@@ -184,6 +184,14 @@ const Game = {
         this.state.gameOver = true;
         this.state.alive = false;
         Audio.hit();
+
+        // Haptic feedback
+        if (navigator.vibrate) {
+            navigator.vibrate(200);
+        }
+
+        // Screen shake
+        Renderer.shake(15);
     },
 
     // Add a new pipe (or recycle existing)

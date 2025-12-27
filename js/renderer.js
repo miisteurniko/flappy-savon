@@ -5,14 +5,16 @@
 const Renderer = {
     _ctx: null,
     _obstacleImg: null,
-    _gridOffset: 0,
-    _t: 0,
+    _stars: [],
+    _clouds: [],
+    _hills: [],
+    _critters: [],
+    _isNight: false,
+    _shake: 0,
 
     // Initialize renderer
     init(canvas) {
         this._ctx = canvas.getContext('2d', { alpha: false });
-
-        // Disable smoothing for crisper rendering
         this._ctx.imageSmoothingEnabled = false;
 
         // Load obstacle image if configured
@@ -20,6 +22,74 @@ const Renderer = {
             this._obstacleImg = new Image();
             this._obstacleImg.src = CONFIG.images.obstacle;
         }
+
+        // Initialize Decor (Stars & Clouds)
+        this._initDecor();
+
+        // Initial day/night check
+        this._checkDayNight();
+    },
+
+    _initDecor() {
+        const W = CONFIG.canvas.width;
+        const H = CONFIG.canvas.height;
+
+        // 1. Stars (Static positions)
+        for (let i = 0; i < 60; i++) {
+            this._stars.push({
+                x: Math.random() * W,
+                y: Math.random() * (H * 0.6), // Top 60%
+                r: Math.random() * 1.5 + 0.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.05 + 0.02
+            });
+        }
+
+        // 2. Clouds (Procedural)
+        for (let i = 0; i < 6; i++) {
+            this._clouds.push({
+                x: Math.random() * W,
+                y: Math.random() * (H * 0.4),
+                w: 60 + Math.random() * 80,
+                h: 20 + Math.random() * 20,
+                speed: 10 + Math.random() * 15 // Very slow parallax
+            });
+        }
+
+        // 3. Hills (Permanent background)
+        // Generate a smooth curve with mapped points
+        let hx = 0;
+        while (hx < W + 100) {
+            this._hills.push({
+                x: hx,
+                y: Math.sin(hx * 0.01) * 20 + Math.sin(hx * 0.03) * 15
+            });
+            hx += 10;
+        }
+    },
+
+    _checkDayNight() {
+        // Approximate France (Lat 47) Sun Cycle
+        const now = new Date();
+        const month = now.getMonth(); // 0-11
+        const hour = now.getHours();
+
+        // Simple lookup for sunrise/sunset hour in France (approximate)
+        // J F M A M J J A S O N D
+        const sunrise = [8, 8, 7, 7, 6, 6, 6, 7, 7, 8, 8, 8];
+        const sunset = [17, 18, 19, 21, 21, 22, 22, 21, 20, 19, 17, 17];
+
+        // Is it night?
+        if (hour < sunrise[month] || hour >= sunset[month]) {
+            this._isNight = true;
+        } else {
+            this._isNight = false;
+        }
+    },
+
+    // Trigger screen shake
+    shake(intensity) {
+        this._shake = intensity;
     },
 
     // Update animation time
@@ -27,11 +97,113 @@ const Renderer = {
         this._t++;
         this._gridOffset += 0.15 * dt;
         if (this._gridOffset > 32) this._gridOffset -= 32;
+
+        // Decay shake
+        if (this._shake > 0.5) {
+            this._shake *= 0.9;
+        } else {
+            this._shake = 0;
+        }
+
+        // Check Day/Night every ~10 seconds (600 frames)
+        if (this._t % 600 === 0) this._checkDayNight();
+
+        // Animate Decor
+        if (this._isNight) {
+            // Twinkle stars
+            for (const s of this._stars) {
+                s.alpha += s.speed * (Math.random() < 0.5 ? 1 : -1);
+                if (s.alpha < 0.2) s.alpha = 0.2;
+                if (s.alpha > 0.8) s.alpha = 0.8;
+            }
+        } else {
+            // Move clouds (parallax)
+            // Move at 10% of game speed for depth
+            const cloudSpeed = CONFIG.physics.scrollSpeed * 0.1 * dt;
+            for (const c of this._clouds) {
+                c.x -= cloudSpeed;
+                if (c.x + c.w < 0) {
+                    c.x = CONFIG.canvas.width + 50;
+                    c.y = Math.random() * (CONFIG.canvas.height * 0.4);
+                }
+            }
+        }
+
+
+        // 2. Animate Hills (Parallax - very slow)
+        const hillSpeed = CONFIG.physics.scrollSpeed * 0.05 * dt;
+        for (const h of this._hills) {
+            h.x -= hillSpeed;
+        }
+        // Recycle hills loop
+        if (this._hills.length > 0 && this._hills[0].x < -10) {
+            const first = this._hills.shift();
+            const last = this._hills[this._hills.length - 1];
+            first.x = last.x + 10;
+            // Continue the sine wave pattern
+            first.y = Math.sin(first.x * 0.01) * 20 + Math.sin(first.x * 0.03) * 15;
+            this._hills.push(first);
+        }
+
+        // 3. Animate/Spawn Critters
+        this._manageCritters(dt);
+    },
+
+    _manageCritters(dt) {
+        const W = CONFIG.canvas.width;
+        const H = CONFIG.canvas.height;
+        const speed = CONFIG.physics.scrollSpeed * dt;
+
+        // Spawn logic (rare)
+        if (this._critters.length < 5 && Math.random() < 0.005) {
+            if (this._isNight) {
+                // Firefly
+                this._critters.push({
+                    type: 'firefly',
+                    x: W + 20,
+                    y: H * 0.5 + (Math.random() * 200 - 100),
+                    vx: -(Math.random() * 0.5 + 0.5) * speed,
+                    t: Math.random() * 100
+                });
+            } else {
+                // Bird
+                this._critters.push({
+                    type: 'bird',
+                    x: W + 20,
+                    y: H * 0.2 + Math.random() * 200,
+                    vx: -(Math.random() * 1 + 1) * speed,
+                    flap: 0
+                });
+            }
+        }
+
+        // Move & cleanup
+        for (let i = this._critters.length - 1; i >= 0; i--) {
+            const c = this._critters[i];
+            c.x += c.vx;
+
+            if (c.type === 'firefly') {
+                c.t += 0.1 * dt;
+                c.y += Math.sin(c.t) * 0.5 * dt; // Bobbing
+            } else if (c.type === 'bird') {
+                c.flap += 0.2 * dt; // Flap animation
+            }
+
+            if (c.x < -20) this._critters.splice(i, 1);
+        }
     },
 
     // Clear canvas
     clear() {
+        this._ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
         this._ctx.clearRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+
+        // Apply shake if active
+        if (this._shake > 0) {
+            const dx = (Math.random() - 0.5) * this._shake;
+            const dy = (Math.random() - 0.5) * this._shake;
+            this._ctx.translate(dx, dy);
+        }
     },
 
     // Draw background (optimized - no gradient loop)
@@ -44,12 +216,70 @@ const Renderer = {
         cx.fillStyle = currentTheme.bg1;
         cx.fillRect(0, 0, W, H);
 
+        // Decor (Stars/Clouds/Hills/Critters) BEHIND the transition fade logic
+        this._drawDecor(cx, W, H, currentTheme);
+
         // Transition overlay (if needed)
         if (themeTrans < 1) {
             cx.globalAlpha = 1 - themeTrans;
             cx.fillStyle = prevTheme.bg1;
             cx.fillRect(0, 0, W, H);
+
+            // Note: We don't draw prev theme decor to avoid visual clutter during fade
+            // The new theme's decor (already drawn) will just fade in slightly obscured by the prev color layer
+
             cx.globalAlpha = 1;
+        }
+    },
+
+    _drawDecor(cx, W, H, theme) {
+        // 1. Hills (Furthest)
+        cx.fillStyle = this._mixColor(theme.bg1, '#000000', 0.05); // 5% darker than bg
+        cx.beginPath();
+        cx.moveTo(0, H);
+        for (const p of this._hills) {
+            cx.lineTo(p.x, H - CONFIG.ground.height - 50 + p.y);
+        }
+        cx.lineTo(W, H);
+        cx.lineTo(0, H);
+        cx.fill();
+
+        // 2. Stars / Clouds
+        if (this._isNight) {
+            cx.fillStyle = '#ffffff';
+            for (const s of this._stars) {
+                cx.globalAlpha = s.alpha;
+                cx.beginPath();
+                cx.arc(Math.round(s.x), Math.round(s.y), s.r, 0, Math.PI * 2);
+                cx.fill();
+            }
+            cx.globalAlpha = 1;
+        } else {
+            cx.fillStyle = 'rgba(255, 255, 255, 0.4)'; // Soft white clouds
+            for (const c of this._clouds) {
+                this._roundRect(Math.round(c.x), Math.round(c.y), c.w, c.h, c.h / 2, true);
+            }
+        }
+
+        // 3. Critters
+        for (const c of this._critters) {
+            if (c.type === 'firefly') {
+                cx.fillStyle = '#ffffaa';
+                cx.shadowColor = '#ffffaa';
+                cx.shadowBlur = 6;
+                cx.beginPath();
+                cx.arc(c.x, c.y, 2, 0, Math.PI * 2);
+                cx.fill();
+                cx.shadowBlur = 0;
+            } else if (c.type === 'bird') {
+                cx.fillStyle = 'rgba(0,0,0,0.2)'; // Dark silhouette
+                cx.beginPath();
+                const wingY = Math.sin(c.flap) * 3;
+                cx.moveTo(c.x, c.y);
+                cx.lineTo(c.x + 5, c.y - wingY);
+                cx.lineTo(c.x + 10, c.y);
+                cx.fill();
+            }
         }
     },
 
@@ -138,7 +368,7 @@ const Renderer = {
 
         // 3. Highlight (Glossy / Wet look)
         // Subtler, top-left curve
-        cx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        cx.fillStyle = 'rgba(255, 255, 255, 0.15)';
         this._roundRect(-w / 2 + 4, -h / 2 + 4, w - 8, h * 0.4, 6, true);
 
         // 4. Engraved Text Effect ("SAVON YVARD")
@@ -209,7 +439,7 @@ const Renderer = {
         cx.textAlign = 'center';
         cx.fillText('Appuie pour jouer', W / 2, H * 0.35);
         cx.font = '14px "Spinnaker", sans-serif';
-        cx.fillText('Espace / clic = saut', W / 2, H * 0.35 + 26);
+        cx.fillText('Appuie pour sauter', W / 2, H * 0.35 + 26);
         cx.restore();
     },
 

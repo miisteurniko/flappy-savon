@@ -91,7 +91,7 @@ const CONFIG = {
     { id: 'figue', name: 'Figue Santal', c1: '#e8dcb5', c2: '#d4c085', unlockAt: 10 },    // 10 pts
     { id: 'lait', name: "Lait d'ânesse", c1: '#f9fbff', c2: '#e2e8f0', unlockAt: 15 },    // 15 pts
     { id: 'ortie', name: "Poudre d'Ortie", c1: '#cfe8c8', c2: '#84c17a', unlockAt: 20 },  // 20 pts
-    { id: 'miel', name: 'Miel Amande', c1: '#8b5a2b', c2: '#63401f', unlockAt: 50 },      // 50 pts
+    { id: 'miel', name: 'Miel Amande', c1: '#eec051', c2: '#d4a037', unlockAt: 50 },      // 50 pts
   ],
 
   // Badges

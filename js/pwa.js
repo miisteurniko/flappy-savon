@@ -35,6 +35,12 @@ const PWA = {
 
         // 3. Handle Install Click
         installBtn.addEventListener('click', () => {
+            // Close menu drawer first
+            const drawer = document.getElementById('menuDrawer');
+            const overlay = document.getElementById('menuOverlay');
+            if (drawer) drawer.classList.remove('open');
+            if (overlay) overlay.classList.remove('open');
+
             if (isIOS) {
                 // Show iOS instructions
                 if (iosInstallModal) {

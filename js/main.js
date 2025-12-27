@@ -184,7 +184,8 @@
         lastTime = timestamp;
 
         // Clamp dt to prevent huge jumps (tab switching, etc.)
-        const dt = Math.min(rawDt, 50);
+        // Reduced to 32ms (approx 30fps) to prevent "acceleration" feel on input lag
+        const dt = Math.min(rawDt, 32);
         const normalizedDt = dt / FRAME_TIME;
 
         // Update game logic
