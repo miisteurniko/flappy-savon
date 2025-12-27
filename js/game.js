@@ -69,30 +69,30 @@ const Game = {
         Security.initSession();
     },
 
-    // Flap action
+    // Flap action (optimized for performance)
     flap() {
         if (this.state.paused) return;
-
-        Audio.ensureContext();
 
         if (this.state.gameOver) {
             this.reset();
             return;
         }
 
+        // Core physics only - keep minimal
         this.state.alive = true;
         this.soap.vy = CONFIG.physics.flapForce;
 
-        // Occasional bubble on flap (20% chance)
-        if (Math.random() < 0.2) {
-            Particles.spawnBubble(this.soap.x + 10, this.soap.y);
-            if (Math.random() < 0.3) { // Sometimes 2 bubbles
-                Particles.spawnBubble(this.soap.x - 10, this.soap.y + 5);
-            }
-        }
+        // Deferred operations (non-blocking)
+        requestAnimationFrame(() => {
+            Audio.ensureContext();
+            Audio.flap();
+            Security.recordFlap();
 
-        Audio.flap();
-        Security.recordFlap();
+            // Occasional bubble (20% chance)
+            if (Math.random() < 0.2) {
+                Particles.spawnBubble(this.soap.x + 10, this.soap.y);
+            }
+        });
     },
 
     // Toggle pause

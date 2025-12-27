@@ -8,23 +8,13 @@ const Particles = {
     confetti: [],
     steam: [],
 
-    // Initialize particles
+    // Initialize particles (minimal)
     init() {
         this.bubbles = [];
         this.leaves = [];
         this.confetti = [];
         this.steam = [];
-
-        // Initial bubbles (minimal - occasional only)
-        this.spawnBubble(
-            Math.random() * CONFIG.canvas.width,
-            Math.random() * CONFIG.canvas.height
-        );
-
-        // Initial leaves (reduced for performance)
-        for (let i = 0; i < 3; i++) {
-            this.spawnLeaf(CONFIG.canvas.width + Math.random() * CONFIG.canvas.width);
-        }
+        // No initial particles - only spawn on flap/record
     },
 
     // Reset particles
@@ -104,65 +94,20 @@ const Particles = {
         }
     },
 
-    // Update all particles
-    update(dt, t, currentTheme) {
-        const W = CONFIG.canvas.width;
-        const H = CONFIG.canvas.height;
-        const groundY = H - CONFIG.ground.height;
-
-        // Update bubbles
-        // Update bubbles (iterate backwards to allow removal)
+    // Update all particles (minimal - only bubbles and confetti)
+    update(dt) {
+        // Update bubbles (simple, no ambient spawn)
         for (let i = this.bubbles.length - 1; i >= 0; i--) {
             const b = this.bubbles[i];
             b.y -= b.vy * dt;
-            b.x += Math.sin((b.y + b.r) * 0.02) * 0.2;
-            b.alpha -= 0.0008 * dt;
+            b.alpha -= 0.002 * dt;
 
-            // Remove dead bubbles
             if (b.y < -20 || b.alpha <= 0) {
                 this.bubbles.splice(i, 1);
             }
         }
 
-        // Maintain ambient bubbles (occasional only)
-        if (this.bubbles.length < 2) {
-            if (Math.random() < 0.005) { // Very rare spawn
-                this.spawnBubble(
-                    this._rand(0, W),
-                    groundY + 20
-                );
-            }
-        }
-
-        // Update leaves
-        for (const f of this.leaves) {
-            f.x -= f.vx * dt;
-            f.y += f.vy * dt;
-            f.rot += 0.01 * dt;
-
-            if (f.x < -50) {
-                Object.assign(f, this.spawnLeaf(W + this._rand(0, 200), true));
-            }
-        }
-
-        // Update steam (only in fog theme)
-        if (currentTheme.fog) {
-            this.spawnSteam();
-            for (let i = this.steam.length - 1; i >= 0; i--) {
-                const s = this.steam[i];
-                s.y -= s.v * dt;
-                s.x += Math.sin((t + s.seed) * 0.05) * 0.2;
-                s.a -= 0.0015 * dt;
-
-                if (s.a <= 0 || s.y < -30) {
-                    this.steam.splice(i, 1);
-                }
-            }
-        } else {
-            this.steam.length = 0;
-        }
-
-        // Update confetti
+        // Update confetti only
         for (let i = this.confetti.length - 1; i >= 0; i--) {
             const c = this.confetti[i];
             c.x += c.vx * dt;
