@@ -397,15 +397,22 @@ const UI = {
         document.getElementById('statPoints').textContent = localStorage.getItem('flappySavonPoints') || '0';
 
         // Count badges
-        const badges = JSON.parse(localStorage.getItem('flappyBadges') || '{}');
-        const badgeCount = Object.keys(badges).length;
-        document.getElementById('statBadges').textContent = badgeCount;
+        const unlockedBadges = JSON.parse(localStorage.getItem('flappyBadges') || '{}');
+        const badgeScores = Object.keys(unlockedBadges);
+        document.getElementById('statBadges').textContent = badgeScores.length;
 
-        // Show badge emojis
+        // Show badge names from CONFIG
         const badgesList = document.getElementById('statsBadgesList');
         if (badgesList) {
-            const badgeEmojis = Object.values(badges).join(' ');
-            badgesList.textContent = badgeEmojis || '🔒 Aucun badge encore';
+            if (badgeScores.length === 0) {
+                badgesList.innerHTML = '<span style="color: #999;">🔒 Aucun badge encore</span>';
+            } else {
+                const names = badgeScores.map(score => {
+                    const badge = CONFIG.badges.find(b => b.score === Number(score));
+                    return badge ? `<span class="badge-chip">🏆 ${badge.name}</span>` : '';
+                }).filter(Boolean).join(' ');
+                badgesList.innerHTML = names;
+            }
         }
 
         modal.classList.add('open');

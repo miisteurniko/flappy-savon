@@ -1078,3 +1078,14 @@ canvas {
   cursor: pointer;
   pointer-events: auto;
 }
+
+.badge-chip {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd700, #ffb347);
+  color: #2c2420;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 4px;
+}
