@@ -52,47 +52,20 @@ const Renderer = {
         cx.fillRect(0, 0, W, H);
     },
 
-    // Draw foam ground (optimized for smoothness)
-    drawFoamGround(themeId) {
+    // Draw ground (static - no animation for performance)
+    drawFoamGround() {
         const cx = this._ctx;
         const W = CONFIG.canvas.width;
         const H = CONFIG.canvas.height;
         const groundY = H - CONFIG.ground.height;
 
-        // Solid ground base
-        cx.fillStyle = '#d5e8f0';
-        cx.fillRect(0, groundY + 15, W, CONFIG.ground.height);
+        // Solid ground
+        cx.fillStyle = '#c8e0f0';
+        cx.fillRect(0, groundY, W, CONFIG.ground.height);
 
-        // Single smooth wave on top
-        const waveOffset = this._t * 0.3; // Slower, smoother
-        cx.fillStyle = 'rgba(200, 230, 245, 0.95)';
-        cx.beginPath();
-        cx.moveTo(0, groundY + 20);
-
-        // Larger step for performance, gentle curve
-        for (let x = 0; x <= W; x += 20) {
-            const wave1 = Math.sin((x + waveOffset) / 60) * 6;
-            const wave2 = Math.sin((x - waveOffset * 0.5) / 90) * 4;
-            const y = groundY + 12 + wave1 + wave2;
-            cx.lineTo(Math.round(x), Math.round(y));
-        }
-
-        cx.lineTo(W, H);
-        cx.lineTo(0, H);
-        cx.closePath();
-        cx.fill();
-
-        // Foam highlight line
-        cx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        cx.lineWidth = 2;
-        cx.beginPath();
-        for (let x = 0; x <= W; x += 25) {
-            const wave = Math.sin((x + waveOffset) / 60) * 5;
-            const y = groundY + 10 + wave;
-            if (x === 0) cx.moveTo(x, y);
-            else cx.lineTo(x, y);
-        }
-        cx.stroke();
+        // Simple wave top (static)
+        cx.fillStyle = '#dbeef8';
+        cx.fillRect(0, groundY, W, 12);
     },
 
     // Draw pipes
@@ -143,26 +116,22 @@ const Renderer = {
         const skin = CONFIG.skins.find(s => s.id === skinId) || CONFIG.skins[0];
 
         cx.save();
-        // Round positions for crisp rendering
         cx.translate(Math.round(x), Math.round(y));
         cx.rotate(rot);
 
-        const r = 12;
-        const g = cx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
-        g.addColorStop(0, skin.c1);
-        g.addColorStop(1, skin.c2);
-        cx.fillStyle = g;
-        this._roundRect(-w / 2, -h / 2, w, h, r, true);
+        // Solid color soap (no gradient for performance)
+        cx.fillStyle = skin.c1;
+        this._roundRect(-w / 2, -h / 2, w, h, 12, true);
 
         // Highlight
-        cx.globalAlpha = 0.6;
+        cx.globalAlpha = 0.5;
         cx.fillStyle = '#ffffff';
-        this._roundRect(-w / 2 + 6, -h / 2 + 6, w - 12, 8, 6, true);
+        this._roundRect(-w / 2 + 6, -h / 2 + 6, w - 12, 6, 4, true);
 
         // Text
         cx.globalAlpha = 1;
         cx.fillStyle = '#0e1116';
-        cx.font = '800 8px "Spinnaker", sans-serif';
+        cx.font = '800 8px Spinnaker, sans-serif';
         cx.textAlign = 'center';
         cx.textBaseline = 'middle';
         cx.fillText('SAVON YVARD', 0, 2);
@@ -170,25 +139,24 @@ const Renderer = {
         cx.restore();
     },
 
-    // Draw bubbles
+    // Draw bubbles (simplified for performance)
     drawBubbles(bubbles) {
         const cx = this._ctx;
-        cx.save();
 
         for (const b of bubbles) {
             cx.globalAlpha = b.alpha;
-            const grad = cx.createRadialGradient(b.x - 2, b.y - 2, 1, b.x, b.y, b.r);
-            grad.addColorStop(0, '#ffffff');
-            grad.addColorStop(0.2, '#ffffffaa');
-            grad.addColorStop(1, '#a9d4ff10');
-            cx.fillStyle = grad;
+            cx.fillStyle = '#e0f0ff';
             cx.beginPath();
-            cx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+            cx.arc(Math.round(b.x), Math.round(b.y), b.r, 0, Math.PI * 2);
+            cx.fill();
+
+            // Simple highlight
+            cx.fillStyle = '#ffffff';
+            cx.beginPath();
+            cx.arc(Math.round(b.x) - 2, Math.round(b.y) - 2, b.r * 0.3, 0, Math.PI * 2);
             cx.fill();
         }
-
         cx.globalAlpha = 1;
-        cx.restore();
     },
 
     // Draw leaves

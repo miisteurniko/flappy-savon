@@ -88,9 +88,9 @@ const Game = {
             Audio.flap();
             Security.recordFlap();
 
-            // Occasional bubble (20% chance)
-            if (Math.random() < 0.2) {
-                Particles.spawnBubble(this.soap.x + 10, this.soap.y);
+            // Rare bubble (10% chance)
+            if (Math.random() < 0.1) {
+                Particles.spawnBubble(this.soap.x + 8, this.soap.y);
             }
         });
     },

@@ -66,20 +66,19 @@ const Particles = {
         });
     },
 
-    // Spawn confetti burst
     spawnConfetti() {
-        // Limit confetti to prevent performance issues
-        if (this.confetti.length > 50) return;
+        // Strict limit for performance
+        if (this.confetti.length > 20) return;
 
-        for (let i = 0; i < 20; i++) { // Reduced from 40 to 20
+        for (let i = 0; i < 10; i++) { // Reduced to 10
             this.confetti.push({
-                x: CONFIG.canvas.width / 2 + this._rand(-80, 80),
-                y: CONFIG.canvas.height * 0.3 + this._rand(-20, 20),
-                vx: this._rand(-1, 1),
-                vy: this._rand(-2, -0.5),
-                life: this._rand(18, 30),
-                r: this._rand(0, 6),
-                col: `hsl(${Math.floor(this._rand(0, 360))}, 80%, 60%)`
+                x: CONFIG.canvas.width / 2 + this._rand(-60, 60),
+                y: CONFIG.canvas.height * 0.3,
+                vx: this._rand(-0.8, 0.8),
+                vy: this._rand(-1.5, -0.3),
+                life: this._rand(15, 25),
+                r: this._rand(0, 5),
+                col: `hsl(${Math.floor(this._rand(0, 360))}, 70%, 55%)`
             });
         }
     },
