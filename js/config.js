@@ -43,8 +43,8 @@ const CONFIG = {
 
   // Soap (player)
   soap: {
-    width: 66,
-    height: 38,
+    width: 60,
+    height: 35,
     startX: 100
   },
 

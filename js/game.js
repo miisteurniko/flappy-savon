@@ -78,12 +78,16 @@ const Game = {
             return;
         }
 
-        // Core physics only - keep minimal
+        // Core physics only - immediate
         this.state.alive = true;
         this.soap.vy = CONFIG.physics.flapForce;
 
-        // Deferred operations (non-blocking)
-        requestAnimationFrame(() => {
+        // Visual feedback immediate
+        if (this.soap.rot < -0.5) this.soap.rot = -0.5;
+
+        // Heavy/IO operations deferred to next frame or idle
+        // Use setTimeout to clear the input event stack immediately
+        setTimeout(() => {
             Audio.ensureContext();
             Audio.flap();
             Security.recordFlap();
@@ -92,7 +96,7 @@ const Game = {
             if (Math.random() < 0.1) {
                 Particles.spawnBubble(this.soap.x + 8, this.soap.y);
             }
-        });
+        }, 0);
     },
 
     // Toggle pause

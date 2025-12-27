@@ -8,6 +8,7 @@ const Renderer = {
     _stars: [],
     _clouds: [],
     _hills: [],
+    _hillRightEdge: 0,
     _critters: [],
     _isNight: false,
     _shake: 0,
@@ -65,6 +66,17 @@ const Renderer = {
                 y: Math.sin(hx * 0.01) * 20 + Math.sin(hx * 0.03) * 15
             });
             hx += 10;
+        }
+        // Track right edge for wrapping
+        this._hillRightEdge = hx;
+
+        // 4. Critters Pool (Pre-allocated, Zero GC)
+        for (let i = 0; i < 10; i++) {
+            this._critters.push({
+                active: false,
+                type: 'bird',
+                x: 0, y: 0, vx: 0, flap: 0, t: 0
+            });
         }
     },
 
@@ -138,12 +150,11 @@ const Renderer = {
         for (const h of this._hills) {
             h.x -= hillSpeed;
         }
-        // Recycle hills loop
-        if (this._hills.length > 0 && this._hills[0].x < -10) {
+        // Recycle hills (shift/push - simple and reliable)
+        while (this._hills.length > 0 && this._hills[0].x < -10) {
             const first = this._hills.shift();
             const last = this._hills[this._hills.length - 1];
             first.x = last.x + 10;
-            // Continue the sine wave pattern
             first.y = Math.sin(first.x * 0.01) * 20 + Math.sin(first.x * 0.03) * 15;
             this._hills.push(first);
         }
@@ -157,42 +168,53 @@ const Renderer = {
         const H = CONFIG.canvas.height;
         const speed = CONFIG.physics.scrollSpeed * dt;
 
-        // Spawn logic (rare)
-        if (this._critters.length < 5 && Math.random() < 0.005) {
-            if (this._isNight) {
-                // Firefly
-                this._critters.push({
-                    type: 'firefly',
-                    x: W + 20,
-                    y: H * 0.5 + (Math.random() * 200 - 100),
-                    vx: -(Math.random() * 0.5 + 0.5) * speed,
-                    t: Math.random() * 100
-                });
-            } else {
-                // Bird
-                this._critters.push({
-                    type: 'bird',
-                    x: W + 20,
-                    y: H * 0.2 + Math.random() * 200,
-                    vx: -(Math.random() * 1 + 1) * speed,
-                    flap: 0
-                });
+        // Count active critters
+        let activeCount = 0;
+        for (const c of this._critters) {
+            if (c.active) activeCount++;
+        }
+
+        // Spawn logic (rare) - reuse inactive slot
+        if (activeCount < 5 && Math.random() < 0.005) {
+            // Find inactive critter
+            for (const c of this._critters) {
+                if (c.active) continue;
+
+                // Reuse this slot
+                c.active = true;
+                c.x = W + 20;
+
+                if (this._isNight) {
+                    c.type = 'firefly';
+                    c.y = H * 0.5 + (Math.random() * 200 - 100);
+                    c.vx = -(Math.random() * 0.5 + 0.5) * speed;
+                    c.t = Math.random() * 100;
+                    c.flap = 0;
+                } else {
+                    c.type = 'bird';
+                    c.y = H * 0.2 + Math.random() * 200;
+                    c.vx = -(Math.random() * 1 + 1) * speed;
+                    c.flap = 0;
+                    c.t = 0;
+                }
+                break;
             }
         }
 
-        // Move & cleanup
-        for (let i = this._critters.length - 1; i >= 0; i--) {
-            const c = this._critters[i];
+        // Move & deactivate (no splice)
+        for (const c of this._critters) {
+            if (!c.active) continue;
+
             c.x += c.vx;
 
             if (c.type === 'firefly') {
                 c.t += 0.1 * dt;
-                c.y += Math.sin(c.t) * 0.5 * dt; // Bobbing
+                c.y += Math.sin(c.t) * 0.5 * dt;
             } else if (c.type === 'bird') {
-                c.flap += 0.2 * dt; // Flap animation
+                c.flap += 0.2 * dt;
             }
 
-            if (c.x < -20) this._critters.splice(i, 1);
+            if (c.x < -20) c.active = false; // Deactivate instead of splice
         }
     },
 
@@ -341,55 +363,48 @@ const Renderer = {
         }
     },
 
-    // Draw soap (player)
+    // Draw soap (player) - ENHANCED but OPTIMIZED
     drawSoap(x, y, w, h, rot, skinId) {
         const cx = this._ctx;
-        const skin = CONFIG.skins.find(s => s.id === skinId) || CONFIG.skins[0];
+
+        // Cache skin and gradient lookup (avoid recreation every frame)
+        if (this._cachedSkinId !== skinId) {
+            this._cachedSkin = CONFIG.skins.find(s => s.id === skinId) || CONFIG.skins[0];
+            this._cachedSkinId = skinId;
+            // Pre-create gradient for this skin
+            const grad = cx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+            grad.addColorStop(0, this._cachedSkin.c1);
+            grad.addColorStop(1, this._cachedSkin.c2);
+            this._cachedGradient = grad;
+        }
+        const skin = this._cachedSkin;
 
         cx.save();
         cx.translate(Math.round(x), Math.round(y));
         cx.rotate(rot);
 
-        // 1. Drop shadow (soft, reduced)
-        cx.shadowColor = 'rgba(0,0,0,0.08)'; // Was 0.15
-        cx.shadowBlur = 6;                   // Was 10
-        cx.shadowOffsetY = 2;                // Was 4
+        // Border for depth (skin-based color)
+        cx.strokeStyle = skin.c2;
+        cx.lineWidth = 1.5;
+        this._roundRect(-w / 2, -h / 2, w, h, 10, false, true);
 
-        // 2. Body Gradient (simulating 3D volume)
-        // Light comes from top-left
-        const grad = cx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
-        grad.addColorStop(0, skin.c1); // Light color top-left
-        grad.addColorStop(1, skin.c2); // Dark color bottom-right
-        cx.fillStyle = grad;
+        // Body with cached gradient
+        cx.fillStyle = this._cachedGradient;
+        this._roundRect(-w / 2, -h / 2, w, h, 10, true);
 
-        this._roundRect(-w / 2, -h / 2, w, h, 14, true);
+        // Top highlight (wet/glossy look)
+        cx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        this._roundRect(-w / 2 + 4, -h / 2 + 3, w - 8, h * 0.3, 5, true);
 
-        // Reset shadow for internal details
-        cx.shadowColor = 'transparent';
-        cx.shadowBlur = 0;
-        cx.shadowOffsetY = 0;
 
-        // 3. Highlight (Glossy / Wet look)
-        // Subtler, top-left curve
-        cx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        this._roundRect(-w / 2 + 4, -h / 2 + 4, w - 8, h * 0.4, 6, true);
-
-        // 4. Engraved Text Effect ("SAVON YVARD")
-        cx.font = '800 8px Spinnaker, sans-serif';
+        // Text with slight shadow
+        cx.font = '700 6px Spinnaker, sans-serif';
         cx.textAlign = 'center';
         cx.textBaseline = 'middle';
-
-        // Engraving highlight (bottom-right)
-        cx.fillStyle = 'rgba(255,255,255,0.4)';
-        cx.fillText('SAVON YVARD', 0.5, 2.5);
-
-        // Engraving shadow (top-left)
-        cx.fillStyle = 'rgba(0,0,0,0.2)';
-        cx.fillText('SAVON YVARD', -0.5, 1.5);
-
-        // Main text color
-        cx.fillStyle = '#2c2420'; // Dark ink
-        cx.fillText('SAVON YVARD', 0, 2);
+        cx.fillStyle = 'rgba(0,0,0,0.1)';
+        cx.fillText('SAVON YVARD', 0.5, 1.5);
+        cx.fillStyle = skin.c2;
+        cx.fillText('SAVON YVARD', 0, 1);
 
         cx.restore();
     },
@@ -483,7 +498,7 @@ const Renderer = {
     },
 
     // Helper: rounded rectangle
-    _roundRect(x, y, w, h, r, fill) {
+    _roundRect(x, y, w, h, r, fill, stroke) {
         const cx = this._ctx;
         cx.beginPath();
         cx.moveTo(x + r, y);
@@ -491,8 +506,9 @@ const Renderer = {
         cx.arcTo(x + w, y + h, x, y + h, r);
         cx.arcTo(x, y + h, x, y, r);
         cx.arcTo(x, y, x + w, y, r);
+        cx.closePath();
         if (fill) cx.fill();
-        else cx.stroke();
+        if (stroke) cx.stroke();
     },
 
     // Helper: mix two hex colors

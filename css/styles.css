@@ -78,6 +78,10 @@ canvas {
   /* Changed from contain to cover for fullscreen */
   touch-action: none;
   background: transparent;
+  /* GPU Compositing Hints */
+  will-change: transform;
+  transform: translateZ(0);
+  contain: strict;
 }
 
 /* ===== Top Bar ===== */

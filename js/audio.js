@@ -16,6 +16,9 @@ const Audio = {
             try {
                 this._ctx = new (window.AudioContext || window.webkitAudioContext)();
 
+                // Low latency hint
+                if (this._ctx.baseLatency) console.log('Audio Latency:', this._ctx.baseLatency);
+
                 // Create shared master gain node for performance
                 this._gainNode = this._ctx.createGain();
                 this._gainNode.gain.value = 0.04;
@@ -24,9 +27,9 @@ const Audio = {
                 console.warn('Audio not supported');
             }
         }
-        // Resume if suspended (browser policy)
+        // Resume if suspended (browser policy) - check only if needed
         if (this._ctx && this._ctx.state === 'suspended') {
-            this._ctx.resume();
+            this._ctx.resume().catch(() => { });
         }
     },
 

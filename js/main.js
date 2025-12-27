@@ -40,10 +40,18 @@
     });
 
     // Flap on pointer
+    // Flap on pointer (optimized)
     canvas.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
+        // Prevent default browser actions (zoom/scroll) immediately
+        if (e.cancelable) e.preventDefault();
+
+        // Use setPointerCapture if available to handle "drag out" issues
+        if (canvas.setPointerCapture) {
+            try { canvas.setPointerCapture(e.pointerId); } catch (e) { }
+        }
+
         Game.flap();
-    });
+    }, { passive: false });
 
 
 
@@ -195,38 +203,46 @@
 
     // ===== Game Loop =====
 
-    let lastTime = 0;
+    // Fixed Time Step Logic
     const TARGET_FPS = 60;
-    const FRAME_TIME = 1000 / TARGET_FPS;
+    const TIME_STEP = 1000 / TARGET_FPS; // ~16.66ms
+    let lastTime = 0;
+    let accumulator = 0;
 
     function loop(timestamp) {
-        // Calculate delta time with stability
         if (!lastTime) lastTime = timestamp;
-        const rawDt = timestamp - lastTime;
+        let dt = timestamp - lastTime;
         lastTime = timestamp;
 
-        // Clamp dt to prevent huge jumps (tab switching, etc.)
-        // Reduced to 32ms (approx 30fps) to prevent "acceleration" feel on input lag
-        const dt = Math.min(rawDt, 32);
-        const normalizedDt = dt / FRAME_TIME;
+        // Clamp dt to avoid spiral of death (max 100ms)
+        if (dt > 100) dt = 100;
 
-        // Update game logic
-        const result = Game.update(normalizedDt);
+        accumulator += dt;
 
-        // Handle game events
-        if (result === 'score') {
-            const score = Game.getScore();
-            totalPoints += CONFIG.scoring.pointsPerPipe;
-            UI.updateScore(score);
-            UI.updatePoints(totalPoints);
-            checkBadges(score);
-            updateLiveRank();
-        } else if (result === 'dead') {
-            handleDeath();
+        // Fixed Update (Physics)
+        while (accumulator >= TIME_STEP) {
+            // Update logic with fixed delta (1.0 normalized)
+            const result = Game.update(1.0);
+
+            // Handle game events synchronized with physics
+            if (result === 'score') {
+                const score = Game.getScore();
+                totalPoints += CONFIG.scoring.pointsPerPipe;
+                UI.updateScore(score);
+                UI.updatePoints(totalPoints);
+                checkBadges(score);
+                updateLiveRank();
+            } else if (result === 'dead') {
+                handleDeath();
+            }
+
+            accumulator -= TIME_STEP;
         }
 
-        // Render
-        Renderer.tick(normalizedDt);
+        // Render (Visuals)
+        // Pass normalized dt for smooth animations (clouds etc)
+        // We use dt / TIME_STEP to match the previous scale
+        Renderer.tick(dt / TIME_STEP);
         draw();
 
         requestAnimationFrame(loop);
