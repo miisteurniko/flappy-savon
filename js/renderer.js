@@ -241,6 +241,12 @@ const Renderer = {
         cx.fillStyle = currentTheme.bg1;
         cx.fillRect(0, 0, W, H);
 
+        // Night overlay (darken when it's real-world night time)
+        if (this._isNight) {
+            cx.fillStyle = 'rgba(10, 15, 30, 0.25)';
+            cx.fillRect(0, 0, W, H);
+        }
+
         // Decor (Stars/Clouds/Hills/Critters) BEHIND the transition fade logic
         this._drawDecor(cx, W, H, currentTheme);
 
