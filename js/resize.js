@@ -7,6 +7,7 @@ const CanvasResize = {
     _baseWidth: 420,
     _baseHeight: 700,
     _scale: 1,
+    _resizeTimeout: null,
 
     // Initialize resize handler
     init(canvas) {
@@ -15,15 +16,21 @@ const CanvasResize = {
         // Initial resize
         this.resize();
 
-        // Listen for resize and orientation change
-        window.addEventListener('resize', () => this.resize());
+        // Debounced resize handler
+        const debouncedResize = () => {
+            clearTimeout(this._resizeTimeout);
+            this._resizeTimeout = setTimeout(() => this.resize(), 100);
+        };
+
+        // Listen for resize and orientation change with debounce
+        window.addEventListener('resize', debouncedResize, { passive: true });
         window.addEventListener('orientationchange', () => {
-            setTimeout(() => this.resize(), 100);
-        });
+            setTimeout(() => this.resize(), 150);
+        }, { passive: true });
 
         // Handle visual viewport changes (for iOS keyboard, etc.)
         if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => this.resize());
+            window.visualViewport.addEventListener('resize', debouncedResize, { passive: true });
         }
     },
 

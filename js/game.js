@@ -82,7 +82,15 @@ const Game = {
 
         this.state.alive = true;
         this.soap.vy = CONFIG.physics.flapForce;
-        Particles.splash(this.soap.x, this.soap.y);
+
+        // Occasional bubble on flap (20% chance)
+        if (Math.random() < 0.2) {
+            Particles.spawnBubble(this.soap.x + 10, this.soap.y);
+            if (Math.random() < 0.3) { // Sometimes 2 bubbles
+                Particles.spawnBubble(this.soap.x - 10, this.soap.y + 5);
+            }
+        }
+
         Audio.flap();
         Security.recordFlap();
     },
@@ -107,7 +115,7 @@ const Game = {
             this.theme.transition = Math.min(1, this.theme.transition + 0.02 * dt);
         }
 
-        // Update particles
+        // Update particles (only confetti used now)
         Particles.update(dt, this.state.t, this.theme.current);
 
         if (this.state.paused || this.state.gameOver) return;

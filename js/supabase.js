@@ -41,7 +41,14 @@ const Supabase = {
             if (existing) {
                 // Update only if best score improved
                 if (payload.best > (existing.best || 0)) {
-                    return await this._update(existing.id, payload);
+                    return await this._update(existing.id, {
+                        pseudo: payload.pseudo,
+                        score: payload.score,
+                        best: payload.best,
+                        points: payload.points,
+                        badges: payload.badges,
+                        optin: payload.optin
+                    });
                 } else {
                     // Update points and last score even if not best
                     return await this._update(existing.id, {

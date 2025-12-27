@@ -116,16 +116,8 @@ const Security = {
         };
     },
 
-    // Detect suspicious behavior (DevTools open, etc.)
+    // Detect suspicious behavior (disabled for performance)
     detectTampering() {
-        // Check if debugger is attached (simple detection)
-        const start = performance.now();
-        debugger; // This line slows down if DevTools is open
-        const elapsed = performance.now() - start;
-
-        if (elapsed > 100) {
-            return true;
-        }
         return false;
     }
 };

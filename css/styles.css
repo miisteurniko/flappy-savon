@@ -36,6 +36,8 @@ body {
   overflow: hidden;
   position: fixed;
   width: 100%;
+  touch-action: none;
+  /* Prevent all touch gestures */
 }
 
 body {
@@ -49,6 +51,7 @@ body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ===== Layout ===== */
@@ -120,6 +123,29 @@ canvas {
 .best-score span {
   font-weight: 700;
   color: #1a1a1a;
+}
+
+.countdown {
+  font-size: 11px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.countdown-bar {
+  position: fixed;
+  top: calc(60px + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 5px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: 600;
+  z-index: 5;
+  pointer-events: none;
 }
 
 .menu-btn {

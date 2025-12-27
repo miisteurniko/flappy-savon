@@ -10,7 +10,10 @@ const Renderer = {
 
     // Initialize renderer
     init(canvas) {
-        this._ctx = canvas.getContext('2d');
+        this._ctx = canvas.getContext('2d', { alpha: false });
+
+        // Disable smoothing for crisper rendering
+        this._ctx.imageSmoothingEnabled = false;
 
         // Load obstacle image if configured
         if (CONFIG.images.obstacle) {
@@ -49,40 +52,47 @@ const Renderer = {
         cx.fillRect(0, 0, W, H);
     },
 
-    // Draw foam ground
+    // Draw foam ground (optimized for smoothness)
     drawFoamGround(themeId) {
         const cx = this._ctx;
         const W = CONFIG.canvas.width;
         const H = CONFIG.canvas.height;
-        const y0 = H - CONFIG.ground.height + 8;
+        const groundY = H - CONFIG.ground.height;
 
-        for (let i = 0; i < 3; i++) {
-            const amp = 8 + i * 4;
-            const h = 26 - i * 6;
-            const off = (this._t * 0.8 + i * 30) % W;
+        // Solid ground base
+        cx.fillStyle = '#d5e8f0';
+        cx.fillRect(0, groundY + 15, W, CONFIG.ground.height);
 
-            let col = i === 0 ? 'rgba(232,245,255,0.9)' :
-                i === 1 ? 'rgba(207,232,255,0.8)' :
-                    'rgba(207,232,255,0.6)';
+        // Single smooth wave on top
+        const waveOffset = this._t * 0.3; // Slower, smoother
+        cx.fillStyle = 'rgba(200, 230, 245, 0.95)';
+        cx.beginPath();
+        cx.moveTo(0, groundY + 20);
 
-            if (themeId === 'atelier') {
-                col = col.replace('255', '245');
-            }
-
-            cx.fillStyle = col;
-            cx.beginPath();
-            cx.moveTo(0, y0 + h);
-
-            for (let x = 0; x <= W; x += 8) {
-                const y = y0 + Math.sin((x + off) / 40) * amp;
-                cx.lineTo(x, y);
-            }
-
-            cx.lineTo(W, H);
-            cx.lineTo(0, H);
-            cx.closePath();
-            cx.fill();
+        // Larger step for performance, gentle curve
+        for (let x = 0; x <= W; x += 20) {
+            const wave1 = Math.sin((x + waveOffset) / 60) * 6;
+            const wave2 = Math.sin((x - waveOffset * 0.5) / 90) * 4;
+            const y = groundY + 12 + wave1 + wave2;
+            cx.lineTo(Math.round(x), Math.round(y));
         }
+
+        cx.lineTo(W, H);
+        cx.lineTo(0, H);
+        cx.closePath();
+        cx.fill();
+
+        // Foam highlight line
+        cx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        for (let x = 0; x <= W; x += 25) {
+            const wave = Math.sin((x + waveOffset) / 60) * 5;
+            const y = groundY + 10 + wave;
+            if (x === 0) cx.moveTo(x, y);
+            else cx.lineTo(x, y);
+        }
+        cx.stroke();
     },
 
     // Draw pipes
@@ -93,12 +103,17 @@ const Renderer = {
         const groundH = CONFIG.ground.height;
 
         for (const p of pipes) {
-            if (this._obstacleImg && this._obstacleImg.complete) {
-                const topH = Math.max(20, p.topH);
-                cx.drawImage(this._obstacleImg, p.x, 0, PIPE_W, topH);
+            // Round to integer pixels to prevent sub-pixel flickering
+            const px = Math.round(p.x);
+            const topH = Math.round(p.topH);
+            const bottomY = Math.round(p.bottomY);
 
-                const bottomH = Math.max(20, H - groundH - p.bottomY);
-                cx.drawImage(this._obstacleImg, p.x, p.bottomY, PIPE_W, bottomH);
+            if (this._obstacleImg && this._obstacleImg.complete) {
+                const th = Math.max(20, topH);
+                cx.drawImage(this._obstacleImg, px, 0, PIPE_W, th);
+
+                const bottomH = Math.max(20, H - groundH - bottomY);
+                cx.drawImage(this._obstacleImg, px, bottomY, PIPE_W, bottomH);
             } else {
                 // Kraft paper style
                 const g1 = cx.createLinearGradient(0, 0, 0, H);
@@ -106,18 +121,18 @@ const Renderer = {
                 g1.addColorStop(1, '#b78b5f');
                 cx.fillStyle = g1;
 
-                this._roundRect(p.x, 0, PIPE_W, p.topH, 12, true);
-                this._roundRect(p.x, p.bottomY, PIPE_W, H - groundH - p.bottomY, 12, true);
+                this._roundRect(px, 0, PIPE_W, topH, 12, true);
+                this._roundRect(px, bottomY, PIPE_W, H - groundH - bottomY, 12, true);
 
                 // Caps
                 cx.fillStyle = '#9e7a52';
-                cx.fillRect(p.x, p.topH - 8, PIPE_W, 8);
-                cx.fillRect(p.x, p.bottomY, PIPE_W, 8);
+                cx.fillRect(px, topH - 8, PIPE_W, 8);
+                cx.fillRect(px, bottomY, PIPE_W, 8);
 
                 // Highlights
                 cx.fillStyle = '#ffffff3a';
-                cx.fillRect(p.x + 8, Math.max(8, p.topH * 0.35), PIPE_W - 16, 12);
-                cx.fillRect(p.x + 8, p.bottomY + (H - groundH - p.bottomY) * 0.2, PIPE_W - 16, 12);
+                cx.fillRect(px + 8, Math.max(8, topH * 0.35), PIPE_W - 16, 12);
+                cx.fillRect(px + 8, bottomY + (H - groundH - bottomY) * 0.2, PIPE_W - 16, 12);
             }
         }
     },
@@ -128,7 +143,8 @@ const Renderer = {
         const skin = CONFIG.skins.find(s => s.id === skinId) || CONFIG.skins[0];
 
         cx.save();
-        cx.translate(x, y);
+        // Round positions for crisp rendering
+        cx.translate(Math.round(x), Math.round(y));
         cx.rotate(rot);
 
         const r = 12;

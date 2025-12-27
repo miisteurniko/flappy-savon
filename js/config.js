@@ -69,11 +69,14 @@ const CONFIG = {
     reminderAfterGames: 2
   },
 
-  // Themes (unlocked by score) - Brand colors: cream, beige, warm tones
+  // Themes (unlocked by score) - Brand colors progression
   themes: [
-    { id: 'savonnerie', from: 0, bg1: '#f5f0e8', bg2: '#ebe4d8', grid: 'rgba(0,0,0,0)', fog: 0, leaves: 6, bubbleMul: 1 },
-    { id: 'atelier', from: 10, bg1: '#ebe4d8', bg2: '#ddd5c5', grid: 'rgba(0,0,0,0)', fog: 0, leaves: 4, bubbleMul: 1.2 },
-    { id: 'hammam', from: 25, bg1: '#e8e0d5', bg2: '#d5ccc0', grid: 'rgba(0,0,0,0)', fog: 1, leaves: 8, bubbleMul: 1.4 }
+    { id: 'savonnerie', from: 0, bg1: '#f5f0e8', bg2: '#ebe4d8', fog: 0, leaves: 2, bubbleMul: 1 },      // Crème (départ)
+    { id: 'atelier', from: 10, bg1: '#e8e4d8', bg2: '#d5cfc2', fog: 0, leaves: 2, bubbleMul: 1 },        // Beige
+    { id: 'lavande', from: 20, bg1: '#e8e0f0', bg2: '#d0c5e5', fog: 0, leaves: 3, bubbleMul: 1.1 },      // Lavande
+    { id: 'hammam', from: 30, bg1: '#d5e8e8', bg2: '#b8d5d5', fog: 1, leaves: 3, bubbleMul: 1.2 },       // Bleu hammam
+    { id: 'sunset', from: 80, bg1: '#f0d5c5', bg2: '#e5b8a0', fog: 0, leaves: 4, bubbleMul: 1.3 },       // Coucher de soleil
+    { id: 'nuit', from: 100, bg1: '#2a2a3a', bg2: '#1a1a28', fog: 1, leaves: 2, bubbleMul: 1.5 }         // Nuit étoilée
   ],
 
   // Skins

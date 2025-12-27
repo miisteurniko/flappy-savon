@@ -11,7 +11,6 @@
     let best = Number(localStorage.getItem('flappySavonBest') || 0);
     let gamesPlayed = Number(localStorage.getItem('flappySavonGames') || 0);
     let unlockedBadges = JSON.parse(localStorage.getItem('flappyBadges') || '{}');
-    let lastFrameTime = 0;
 
     // ===== Canvas Setup =====
     const canvas = document.getElementById('game');
@@ -119,21 +118,7 @@
     // Share button
     document.getElementById('shareBtn').addEventListener('click', async () => {
         closeMenu();
-        const url = location.href;
-        const txt = `Je viens de faire ${Game.getScore()} sur Flappy Savon Yvard ! ${url}`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({ title: 'Flappy Savon', text: txt, url });
-            } catch (e) { }
-        } else {
-            try {
-                await navigator.clipboard.writeText(txt);
-                UI.showToast('Lien copié');
-            } catch (e) {
-                UI.showToast('Impossible de copier');
-            }
-        }
+        await UI.shareScore(Game.getScore(), best);
     });
 
     // Identity modal - Save button (saves and closes)
@@ -188,12 +173,21 @@
 
     // ===== Game Loop =====
 
-    function loop(ms) {
-        const dt = Math.min(32, ms - lastFrameTime || 16);
-        lastFrameTime = ms;
+    let lastTime = 0;
+    const TARGET_FPS = 60;
+    const FRAME_TIME = 1000 / TARGET_FPS;
 
-        // Update
-        const normalizedDt = dt / 16;
+    function loop(timestamp) {
+        // Calculate delta time with stability
+        if (!lastTime) lastTime = timestamp;
+        const rawDt = timestamp - lastTime;
+        lastTime = timestamp;
+
+        // Clamp dt to prevent huge jumps (tab switching, etc.)
+        const dt = Math.min(rawDt, 50);
+        const normalizedDt = dt / FRAME_TIME;
+
+        // Update game logic
         const result = Game.update(normalizedDt);
 
         // Handle game events
@@ -223,9 +217,8 @@
         Renderer.drawBackground(theme.previous, theme.current, theme.transition);
         Renderer.drawPipes(Game.getPipes());
         Renderer.drawFoamGround(theme.current.id);
-        Renderer.drawLeaves(Particles.leaves, theme.current.id);
+        // Minimal particles: bubbles (occasional) and confetti (on record)
         Renderer.drawBubbles(Particles.bubbles);
-        Renderer.drawSteam(Particles.steam, theme.current.fog);
         Renderer.drawConfetti(Particles.confetti);
         Renderer.drawSoap(soap.x, soap.y, soap.w, soap.h, soap.rot, skinId);
 
@@ -264,16 +257,23 @@
         }
     }
 
-    async function handleDeath() {
+    function handleDeath() {
         Game.die();
 
         // Update bests
         const score = Game.getScore();
+        const previousBest = best;
         best = Math.max(best, score);
         localStorage.setItem('flappySavonBest', String(best));
         localStorage.setItem('flappySavonPoints', String(totalPoints));
         UI.updateBest(best);
         UI.updatePoints(totalPoints);
+
+        // 🎉 Confetti on new record!
+        if (score > previousBest && score > 0) {
+            Particles.spawnConfetti();
+            UI.showToast('🎉 Nouveau record !');
+        }
 
         // Track games played
         gamesPlayed++;
@@ -289,31 +289,34 @@
         // UI.showContest(true);
         UI.showLeaderboard(false);
 
-        // Post score and update leaderboard
-        try {
-            await API.postScore({
-                pseudo: localStorage.getItem('pseudo') || '',
-                email: localStorage.getItem('email') || '',
-                optin: localStorage.getItem('optin_email') === '1',
-                score: score,
-                points: totalPoints,
-                best: best,
-                badges: Object.keys(unlockedBadges).map(k => Number(k))
-            });
+        // Post score and update leaderboard (non-blocking)
+        // Use setTimeout to ensure UI updates first
+        setTimeout(async () => {
+            try {
+                await API.postScore({
+                    pseudo: localStorage.getItem('pseudo') || '',
+                    email: localStorage.getItem('email') || '',
+                    optin: localStorage.getItem('optin_email') === '1',
+                    score: score,
+                    points: totalPoints,
+                    best: best,
+                    badges: Object.keys(unlockedBadges).map(k => Number(k))
+                });
 
-            const rows = await API.loadLeaderboard();
-            if (rows) {
-                const email = localStorage.getItem('email');
-                const rank = API.computeRank(rows, email, best);
-                if (rank) {
-                    UI.setLiveRank(rank, !email);
-                    UI.showRank(rank);
-                    UI.showPrize(rank);
+                const rows = await API.loadLeaderboard();
+                if (rows) {
+                    const email = localStorage.getItem('email');
+                    const rank = API.computeRank(rows, email, best);
+                    if (rank) {
+                        UI.setLiveRank(rank, !email);
+                        UI.showRank(rank);
+                        UI.showPrize(rank);
+                    }
                 }
+            } catch (e) {
+                console.error('[Main] Score submission failed:', e);
             }
-        } catch (e) {
-            console.error('[Main] Score submission failed:', e);
-        }
+        }, 50); // Small delay to let UI update first
     }
 
     // ===== Onboarding =====

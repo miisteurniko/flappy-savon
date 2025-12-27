@@ -308,14 +308,74 @@ const UI = {
         if (container) container.innerHTML = '<div class="muted">Impossible de charger le classement.</div>';
     },
 
+    // === SOCIAL SHARE ===
+
+    async shareScore(score, best) {
+        const text = `🎮 J'ai fait ${score} points sur Flappy Savon ! Mon record : ${best} pts. Tu peux faire mieux ? 🧼`;
+        const url = 'https://game.savon-yvard.fr/';
+
+        // Try Web Share API first (mobile)
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Flappy Savon',
+                    text: text,
+                    url: url
+                });
+                return;
+            } catch (e) {
+                // User cancelled or error, fall through to fallback
+            }
+        }
+
+        // Fallback: copy to clipboard and show options
+        const fullText = `${text}\n${url}`;
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(fullText);
+            this.showToast('📋 Copié ! Partage sur tes réseaux');
+        }
+
+        // Open WhatsApp as fallback
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
+        window.open(waUrl, '_blank');
+    },
+
     // === COUNTDOWN ===
 
     _startCountdown() {
-        // Removed as banner is gone
+        // Run immediately
+        setTimeout(() => this._tickCountdown(), 0);
+        // Then every minute
+        setInterval(() => this._tickCountdown(), 60000);
     },
 
     _tickCountdown() {
-        // Removed
+        // Always get fresh reference (modal might not exist at init)
+        const el = document.getElementById('countdown');
+        if (!el) {
+            console.warn('[Countdown] Element not found');
+            return;
+        }
+
+        // January 31, 2026 at 23:59:59 local time
+        const endDate = new Date(2026, 0, 31, 23, 59, 59); // Month is 0-indexed
+        const now = new Date();
+        const diff = endDate - now;
+
+        if (diff <= 0) {
+            el.textContent = 'Terminé !';
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+        if (days > 0) {
+            el.textContent = `Fin dans ${days}j ${hours}h`;
+        } else {
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            el.textContent = `Fin dans ${hours}h ${mins}m`;
+        }
     },
 
     // === MUTE BUTTON ===

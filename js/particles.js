@@ -15,16 +15,14 @@ const Particles = {
         this.confetti = [];
         this.steam = [];
 
-        // Initial bubbles
-        for (let i = 0; i < 10; i++) {
-            this.spawnBubble(
-                Math.random() * CONFIG.canvas.width,
-                Math.random() * CONFIG.canvas.height
-            );
-        }
+        // Initial bubbles (minimal - occasional only)
+        this.spawnBubble(
+            Math.random() * CONFIG.canvas.width,
+            Math.random() * CONFIG.canvas.height
+        );
 
-        // Initial leaves
-        for (let i = 0; i < 6; i++) {
+        // Initial leaves (reduced for performance)
+        for (let i = 0; i < 3; i++) {
             this.spawnLeaf(CONFIG.canvas.width + Math.random() * CONFIG.canvas.width);
         }
     },
@@ -80,7 +78,10 @@ const Particles = {
 
     // Spawn confetti burst
     spawnConfetti() {
-        for (let i = 0; i < 60; i++) {
+        // Limit confetti to prevent performance issues
+        if (this.confetti.length > 50) return;
+
+        for (let i = 0; i < 20; i++) { // Reduced from 40 to 20
             this.confetti.push({
                 x: CONFIG.canvas.width / 2 + this._rand(-80, 80),
                 y: CONFIG.canvas.height * 0.3 + this._rand(-20, 20),
@@ -123,12 +124,12 @@ const Particles = {
             }
         }
 
-        // Maintain ambient bubbles (ensure at least 10 exist)
-        if (this.bubbles.length < 10) {
-            if (Math.random() < 0.05) { // Small chance per frame to respawn
+        // Maintain ambient bubbles (occasional only)
+        if (this.bubbles.length < 2) {
+            if (Math.random() < 0.005) { // Very rare spawn
                 this.spawnBubble(
                     this._rand(0, W),
-                    groundY + 20 // Start just below ground or at bottom
+                    groundY + 20
                 );
             }
         }
