@@ -94,7 +94,7 @@ const CONFIG = {
     { id: 'miel', name: 'Miel Amande', c1: '#eec051', c2: '#d4a037', unlockAt: 50 },      // 50 pts
   ],
 
-  // Badges
+  // Badges (Score-based)
   badges: [
     { score: 10, name: 'Apprenti Mousse' },
     { score: 25, name: 'Maître Savonnier' },
