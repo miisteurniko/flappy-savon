@@ -266,9 +266,20 @@ const UI = {
             this.el.pseudoInput.value = sug;
         }
 
-        // Require all fields for account creation
-        if (!(pseudo && email && optin)) {
-            this.showToast('Pour créer un compte, renseigne pseudo + e‑mail et coche la case.');
+        // Validate fields with specific error messages
+        if (!pseudo || !email) {
+            this.showToast('Renseigne ton pseudo et ton e-mail pour participer.');
+            return false;
+        }
+
+        if (!optin) {
+            this.showToast('⚠️ Coche la case pour accepter les e-mails et valider ton inscription.');
+            // Highlight the checkbox visually
+            const optinRow = this.el.optinInput.closest('.row');
+            if (optinRow) {
+                optinRow.classList.add('shake');
+                setTimeout(() => optinRow.classList.remove('shake'), 600);
+            }
             return false;
         }
 
@@ -431,7 +442,7 @@ const UI = {
 
     async shareScore(score, best) {
         const text = `🎮 J'ai fait ${score} points sur Flappy Savon ! Mon record : ${best} pts. Tu peux faire mieux ? 🧼`;
-        const url = 'https://game.savon-yvard.fr/';
+        const url = 'https://flappy-savon.vercel.app/';
 
         // Try Web Share API first (mobile)
         if (navigator.share) {
