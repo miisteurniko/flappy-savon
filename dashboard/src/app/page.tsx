@@ -20,33 +20,30 @@ const DATE_RANGES: DateRange[] = ['today', '7d', '14d', '30d', 'all'];
 
 function KPICard({ title, value, subtitle, icon }: { title: string; value: string | number; subtitle?: string; icon: string }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-2xl">{icon}</span>
-        <span className="text-gray-500 text-sm font-medium">{title}</span>
+    <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-lg md:text-2xl">{icon}</span>
+        <span className="text-gray-500 text-xs md:text-sm font-medium">{title}</span>
       </div>
-      <div className="text-3xl font-bold text-gray-900">{value}</div>
-      {subtitle && <div className="text-sm text-gray-400 mt-1">{subtitle}</div>}
+      <div className="text-2xl md:text-3xl font-bold text-gray-900">{value}</div>
+      {subtitle && <div className="text-xs text-gray-400 mt-1 truncate">{subtitle}</div>}
     </div>
   );
 }
 
 function DateRangeSelector({ value, onChange }: { value: DateRange; onChange: (v: DateRange) => void }) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as DateRange)}
+      className="px-3 py-2 rounded-xl text-sm font-medium bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
+    >
       {DATE_RANGES.map((range) => (
-        <button
-          key={range}
-          onClick={() => onChange(range)}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition ${value === range
-            ? 'bg-gray-900 text-white'
-            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-            }`}
-        >
+        <option key={range} value={range}>
           {getDateRangeLabel(range)}
-        </button>
+        </option>
       ))}
-    </div>
+    </select>
   );
 }
 
@@ -140,30 +137,29 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">🧼 Flappy Savon Analytics</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">🧼 Flappy Analytics</h1>
             <p className="text-gray-500">
               {getDateRangeLabel(dateRange)}
               {refreshing && <span className="ml-2 text-amber-500">⟳</span>}
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <DateRangeSelector value={dateRange} onChange={setDateRange} />
             <button
               onClick={() => { localStorage.removeItem('flappy_admin_auth'); setIsAuthenticated(false); }}
-              className="text-gray-400 hover:text-gray-600 text-sm"
+              className="text-gray-400 hover:text-gray-600 text-xs"
             >
-              Déconnexion
+              🚪
             </button>
           </div>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
           <KPICard icon="👥" title="Sessions" value={stats.totalSessions} subtitle={getDateRangeLabel(dateRange)} />
           <KPICard icon="🎮" title="Parties jouées" value={stats.totalGames} subtitle={getDateRangeLabel(dateRange)} />
           <KPICard icon="📊" title="Taux conversion" value={`${stats.conversionRate.toFixed(1)}%`} subtitle="Inscriptions / Sessions" />
