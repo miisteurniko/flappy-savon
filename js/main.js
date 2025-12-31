@@ -27,6 +27,19 @@
     UI.updatePoints(totalPoints);
     UI.updateMuteButton(Audio.isMuted());
 
+    // Listen for identity updates (sync from Supabase)
+    window.addEventListener('flappy-identity-updated', (e) => {
+        if (e.detail) {
+            best = e.detail.best || 0;
+            totalPoints = e.detail.points || 0;
+            UI.updateBest(best);
+            UI.updatePoints(totalPoints);
+            // Reload badges
+            unlockedBadges = JSON.parse(localStorage.getItem('flappyBadges') || '{}');
+            console.log('[Main] State synced:', { best, totalPoints });
+        }
+    });
+
     // ===== Event Handlers =====
 
     // Flap on keyboard

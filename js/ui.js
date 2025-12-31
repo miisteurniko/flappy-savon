@@ -301,7 +301,7 @@ const UI = {
         };
     },
 
-    saveIdentity() {
+    async saveIdentity() {
         const { pseudo, email, optin } = this.getIdentityData();
 
         // Auto-complete pseudo from email
@@ -334,7 +334,47 @@ const UI = {
         localStorage.setItem('pseudo', pseudo);
         localStorage.setItem('email', email);
         localStorage.setItem('optin_email', optin ? '1' : '0');
-        this.showToast('Compte enregistré ✓');
+
+        this.showToast('Sauvegarde en cours...');
+
+        try {
+            // Sync with Supabase (Background)
+            if (typeof Supabase !== 'undefined') {
+                const remoteUser = await Supabase.getByEmail(email);
+
+                if (remoteUser) {
+                    // Update local best if remote is better
+                    const localBest = Number(localStorage.getItem('flappySavonBest') || 0);
+                    const localPoints = Number(localStorage.getItem('flappySavonPoints') || 0);
+
+                    const newBest = Math.max(localBest, remoteUser.best || 0);
+                    const newPoints = Math.max(localPoints, remoteUser.points || 0);
+
+                    localStorage.setItem('flappySavonBest', newBest);
+                    localStorage.setItem('flappySavonPoints', newPoints);
+
+                    // Unlock badges if exist
+                    if (remoteUser.badges) {
+                        const badges = remoteUser.badges.split(',');
+                        const localBadges = JSON.parse(localStorage.getItem('flappyBadges') || '{}');
+                        badges.forEach(b => localBadges[b] = true);
+                        localStorage.setItem('flappyBadges', JSON.stringify(localBadges));
+                    }
+
+                    // Dispatch update for Main.js
+                    window.dispatchEvent(new CustomEvent('flappy-identity-updated', {
+                        detail: { best: newBest, points: newPoints }
+                    }));
+
+                    this.showToast(`Compte synchronisé ! Meilleur score : ${newBest}`);
+                } else {
+                    this.showToast('Compte enregistré ✓');
+                }
+            }
+        } catch (e) {
+            console.error('Sync error:', e);
+            this.showToast('Compte enregistré (Mode hors ligne)');
+        }
 
         // Track successful registration
         if (typeof Analytics !== 'undefined') {
