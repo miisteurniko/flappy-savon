@@ -125,11 +125,12 @@ const Renderer = {
 
         // Animate Decor
         if (this._isNight) {
-            // Twinkle stars using sine wave instead of random (much faster)
+            // Twinkle stars using sine wave
             for (let i = 0; i < this._stars.length; i++) {
                 const s = this._stars[i];
-                // Use frame counter and index for pseudo-random but smooth twinkling
-                s.alpha = 0.3 + 0.4 * Math.sin((this._t * s.speed) + i);
+                // Clamp alpha between 0.1 and 0.8 to ensure visibility
+                const sineVal = Math.sin((this._t * s.speed) + i);
+                s.alpha = 0.4 + 0.3 * sineVal; // Range 0.1 to 0.7
             }
         } else {
             // Move clouds (parallax)
@@ -178,8 +179,8 @@ const Renderer = {
         const H = CONFIG.canvas.height;
         const speed = CONFIG.physics.scrollSpeed * dt;
 
-        // Only check spawn every 60 frames (1 second at 60fps)
-        if (this._t % 60 !== 0) {
+        // Check spawn every 10 frames (6 times per second at 60fps)
+        if (this._t % 10 !== 0) {
             // Just update existing critters
             this._updateCritters(dt, speed);
             return;
@@ -191,8 +192,8 @@ const Renderer = {
             if (this._critters[i].active) activeCount++;
         }
 
-        // Spawn logic (rare) - reuse inactive slot
-        if (activeCount < 3 && Math.random() < 0.3) {
+        // Spawn logic - try to keep 1-2 birds active
+        if (activeCount < 3 && Math.random() < 0.05) {
             // Find inactive critter
             for (const c of this._critters) {
                 if (c.active) continue;
