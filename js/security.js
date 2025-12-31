@@ -38,13 +38,19 @@ const Security = {
     // Record pipe passed
     recordPipe(score) {
         this._session.pipesPassed = score;
-        // Store timestamp for verification (capped to last 50)
-        this._session.integrityChecks.push({
-            score,
-            time: performance.now() - this._session.startTime
-        });
-        if (this._session.integrityChecks.length > 50) {
-            this._session.integrityChecks.shift();
+        // Store timestamp for verification (ring buffer - no shift needed)
+        if (this._session.integrityChecks.length < 50) {
+            this._session.integrityChecks.push({
+                score,
+                time: performance.now() - this._session.startTime
+            });
+        } else {
+            // Overwrite oldest entry using modulo (O(1) instead of O(n))
+            const idx = score % 50;
+            this._session.integrityChecks[idx] = {
+                score,
+                time: performance.now() - this._session.startTime
+            };
         }
     },
 

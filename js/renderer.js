@@ -146,17 +146,27 @@ const Renderer = {
 
 
         // 2. Animate Hills (Parallax - very slow)
+        // Use direct index manipulation instead of shift/push for O(1) performance
         const hillSpeed = CONFIG.physics.scrollSpeed * 0.05 * smoothDt;
-        for (const h of this._hills) {
-            h.x -= hillSpeed;
-        }
-        // Recycle hills (shift/push - simple and reliable)
-        while (this._hills.length > 0 && this._hills[0].x < -10) {
-            const first = this._hills.shift();
-            const last = this._hills[this._hills.length - 1];
-            first.x = last.x + 10;
-            first.y = Math.sin(first.x * 0.01) * 20 + Math.sin(first.x * 0.03) * 15;
-            this._hills.push(first);
+        const hillCount = this._hills.length;
+
+        if (hillCount > 0) {
+            // Move all hills
+            for (let i = 0; i < hillCount; i++) {
+                this._hills[i].x -= hillSpeed;
+            }
+
+            // Recycle hills that went off-screen (reposition to end)
+            // Only process the first hill (the leftmost one)
+            const first = this._hills[0];
+            if (first.x < -10) {
+                const last = this._hills[hillCount - 1];
+                const newX = last.x + 10;
+                first.x = newX;
+                first.y = Math.sin(newX * 0.01) * 20 + Math.sin(newX * 0.03) * 15;
+                // Move to end using splice (once per recycled hill, not per frame)
+                this._hills.push(this._hills.shift());
+            }
         }
 
         // 3. Animate/Spawn Critters
