@@ -192,8 +192,8 @@ const Renderer = {
             if (this._critters[i].active) activeCount++;
         }
 
-        // Spawn logic - try to keep 1-2 birds active
-        if (activeCount < 3 && Math.random() < 0.05) {
+        // Spawn logic - try to keep birds active
+        if (activeCount < 5 && Math.random() < 0.15) {
             // Find inactive critter
             for (const c of this._critters) {
                 if (c.active) continue;
@@ -333,6 +333,8 @@ const Renderer = {
 
         // 3. Critters
         for (const c of this._critters) {
+            if (!c.active) continue; // Skip inactive critters regarding of type
+
             if (c.type === 'firefly') {
                 cx.fillStyle = '#ffffaa';
                 cx.shadowColor = '#ffffaa';
