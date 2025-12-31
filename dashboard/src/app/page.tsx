@@ -36,7 +36,7 @@ function DateRangeSelector({ value, onChange }: { value: DateRange; onChange: (v
     <select
       value={value}
       onChange={(e) => onChange(e.target.value as DateRange)}
-      className="px-3 py-2 rounded-xl text-sm font-medium bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
+      className="px-3 py-2 rounded-xl text-sm font-medium bg-slate-800 text-white border-0 focus:outline-none focus:ring-2 focus:ring-slate-600 cursor-pointer"
     >
       {DATE_RANGES.map((range) => (
         <option key={range} value={range}>
