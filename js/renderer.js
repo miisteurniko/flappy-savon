@@ -344,12 +344,12 @@ const Renderer = {
                 cx.fill();
                 cx.shadowBlur = 0;
             } else if (c.type === 'bird') {
-                cx.fillStyle = 'rgba(0,0,0,0.2)'; // Dark silhouette
+                cx.fillStyle = 'rgba(0,0,0,0.6)'; // Much darker silhouette
                 cx.beginPath();
-                const wingY = Math.sin(c.flap) * 3;
+                const wingY = Math.sin(c.flap) * 5; // More flap amplitude
                 cx.moveTo(c.x, c.y);
-                cx.lineTo(c.x + 5, c.y - wingY);
-                cx.lineTo(c.x + 10, c.y);
+                cx.lineTo(c.x + 8, c.y - wingY); // Wider wings
+                cx.lineTo(c.x + 16, c.y); // Longer body
                 cx.fill();
             }
         }
