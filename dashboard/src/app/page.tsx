@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const ADMIN_PASSWORD = 'savonflappy2024';
+const ADMIN_PASSWORD = 'Deffrkillo@1';
 
 const DATE_RANGES: DateRange[] = ['today', '7d', '14d', '30d', 'all'];
 
@@ -39,8 +39,8 @@ function DateRangeSelector({ value, onChange }: { value: DateRange; onChange: (v
           key={range}
           onClick={() => onChange(range)}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition ${value === range
-              ? 'bg-gray-900 text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            ? 'bg-gray-900 text-white'
+            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
         >
           {getDateRangeLabel(range)}
