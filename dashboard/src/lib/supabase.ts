@@ -126,12 +126,11 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
         ? durations.reduce((a, b) => a + b, 0) / durations.length / 1000
         : 0;
 
-    // Recent registrations from scores table
+    // All registrations from scores table (no limit for export)
     const { data: recentUsers } = await supabase
         .from('scores')
         .select('pseudo, email, created_at')
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
 
     return {
         totalSessions: sessionStarts.length,

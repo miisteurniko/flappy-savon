@@ -210,7 +210,25 @@ export default function Dashboard() {
 
         {/* Recent registrations */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-4">📋 Dernières inscriptions</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">📋 Inscriptions ({stats.recentRegistrations.length})</h3>
+            <button
+              onClick={() => {
+                const csv = 'Pseudo,Email,Date\n' + stats.recentRegistrations
+                  .map(u => `"${u.pseudo || ''}","${u.email}","${new Date(u.created_at).toLocaleDateString('fr-FR')}"`)
+                  .join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `emails_flappy_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+              }}
+              className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition flex items-center gap-2"
+            >
+              📥 Exporter CSV
+            </button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
