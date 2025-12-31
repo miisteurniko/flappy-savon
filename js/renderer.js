@@ -125,11 +125,11 @@ const Renderer = {
 
         // Animate Decor
         if (this._isNight) {
-            // Twinkle stars
-            for (const s of this._stars) {
-                s.alpha += s.speed * (Math.random() < 0.5 ? 1 : -1);
-                if (s.alpha < 0.2) s.alpha = 0.2;
-                if (s.alpha > 0.8) s.alpha = 0.8;
+            // Twinkle stars using sine wave instead of random (much faster)
+            for (let i = 0; i < this._stars.length; i++) {
+                const s = this._stars[i];
+                // Use frame counter and index for pseudo-random but smooth twinkling
+                s.alpha = 0.3 + 0.4 * Math.sin((this._t * s.speed) + i);
             }
         } else {
             // Move clouds (parallax)
@@ -178,14 +178,21 @@ const Renderer = {
         const H = CONFIG.canvas.height;
         const speed = CONFIG.physics.scrollSpeed * dt;
 
+        // Only check spawn every 60 frames (1 second at 60fps)
+        if (this._t % 60 !== 0) {
+            // Just update existing critters
+            this._updateCritters(dt, speed);
+            return;
+        }
+
         // Count active critters
         let activeCount = 0;
-        for (const c of this._critters) {
-            if (c.active) activeCount++;
+        for (let i = 0; i < this._critters.length; i++) {
+            if (this._critters[i].active) activeCount++;
         }
 
         // Spawn logic (rare) - reuse inactive slot
-        if (activeCount < 5 && Math.random() < 0.005) {
+        if (activeCount < 3 && Math.random() < 0.3) {
             // Find inactive critter
             for (const c of this._critters) {
                 if (c.active) continue;
@@ -211,8 +218,13 @@ const Renderer = {
             }
         }
 
-        // Move & deactivate (no splice)
-        for (const c of this._critters) {
+        // Move & deactivate existing critters
+        this._updateCritters(dt, speed);
+    },
+
+    _updateCritters(dt, speed) {
+        for (let i = 0; i < this._critters.length; i++) {
+            const c = this._critters[i];
             if (!c.active) continue;
 
             c.x += c.vx;
@@ -224,7 +236,7 @@ const Renderer = {
                 c.flap += 0.2 * dt;
             }
 
-            if (c.x < -20) c.active = false; // Deactivate instead of splice
+            if (c.x < -20) c.active = false;
         }
     },
 
