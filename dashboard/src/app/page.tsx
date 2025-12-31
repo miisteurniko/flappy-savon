@@ -50,20 +50,21 @@ function KPICard({ title, subtitle, value, icon }: { title: string; subtitle: st
 
 function DateRangeSelector({ value, onChange }: { value: DateRange; onChange: (v: DateRange) => void }) {
   return (
-    <div className="flex items-center gap-1 bg-[#4a7c59] rounded-full px-1 py-1">
-      <button className="text-white/60 hover:text-white px-2">‹</button>
+    <div className="relative">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as DateRange)}
-        className="bg-transparent text-white text-sm font-medium focus:outline-none cursor-pointer appearance-none px-2"
+        className="appearance-none bg-[#4a7c59] text-white text-sm font-medium rounded-full px-4 py-2 pr-8 focus:outline-none cursor-pointer hover:bg-[#3d6649] transition"
       >
         {DATE_RANGES.map((range) => (
-          <option key={range} value={range} className="text-black">
+          <option key={range} value={range} className="text-black bg-white">
             {getDateRangeLabel(range)}
           </option>
         ))}
       </select>
-      <button className="text-white/60 hover:text-white px-2">›</button>
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/80">
+        ▼
+      </div>
     </div>
   );
 }
@@ -179,9 +180,10 @@ export default function Dashboard() {
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
           <button
             onClick={loadStats}
-            className="w-9 h-9 rounded-full bg-white border border-[#e8e3db] flex items-center justify-center text-[#7a7265] hover:bg-[#f5f0e8] transition"
+            disabled={refreshing}
+            className={`w-9 h-9 rounded-full bg-white border border-[#e8e3db] flex items-center justify-center text-[#7a7265] hover:bg-[#f5f0e8] transition ${refreshing ? 'animate-spin text-[#4a7c59]' : ''}`}
           >
-            {refreshing ? '⟳' : '↻'}
+            ↻
           </button>
           <div className="ml-auto">
             <button
@@ -247,13 +249,14 @@ export default function Dashboard() {
                     outerRadius={90}
                     paddingAngle={2}
                     dataKey="value"
+                    nameKey="name"
                   >
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(val) => [val, 'Parties']}
+                    formatter={(val, name) => [val, `Score ${name}`]}
                     contentStyle={{ borderRadius: 12, border: '1px solid #e8e3db' }}
                   />
                   <text x="50%" y="45%" textAnchor="middle" fill="#7a7265" fontSize={12}>Total</text>
