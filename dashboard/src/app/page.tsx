@@ -137,12 +137,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">🧼 Flappy Analytics</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800">🧼 Flappy Analytics</h1>
+            <p className="text-slate-600 text-sm">
               {getDateRangeLabel(dateRange)}
               {refreshing && <span className="ml-2 text-amber-500">⟳</span>}
             </p>
@@ -151,9 +151,9 @@ export default function Dashboard() {
             <DateRangeSelector value={dateRange} onChange={setDateRange} />
             <button
               onClick={() => { localStorage.removeItem('flappy_admin_auth'); setIsAuthenticated(false); }}
-              className="text-gray-400 hover:text-gray-600 text-xs"
+              className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-600 text-xs font-medium transition"
             >
-              🚪
+              Déco
             </button>
           </div>
         </div>
