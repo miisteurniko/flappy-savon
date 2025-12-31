@@ -55,23 +55,52 @@ const UI = {
         // Set content
         this.el.unlockName.textContent = skin.name;
 
-        // Style icon with skin gradient
-        this.el.unlockIcon.style.background = `linear-gradient(45deg, ${skin.c1}, ${skin.c2})`;
-        this.el.unlockIcon.style.webkitBackgroundClip = 'text';
-        this.el.unlockIcon.style.webkitTextFillColor = 'transparent';
-        this.el.unlockIcon.innerText = '🧼'; // Solid soap char filled with gradient
-        // Fallback or better styling? 
-        // Actually, simpler: make it a circle with the gradient
-        this.el.unlockIcon.style.background = `linear-gradient(45deg, ${skin.c1}, ${skin.c2})`;
-        this.el.unlockIcon.style.webkitTextFillColor = 'initial'; // Reset
-        this.el.unlockIcon.style.width = '80px';
-        this.el.unlockIcon.style.height = '80px';
-        this.el.unlockIcon.style.borderRadius = '50%';
-        this.el.unlockIcon.style.display = 'grid';
-        this.el.unlockIcon.style.placeItems = 'center';
-        this.el.unlockIcon.style.margin = '0 auto 20px';
-        this.el.unlockIcon.style.color = '#fff';
-        this.el.unlockIcon.style.textShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        // Draw the actual soap in the canvas
+        const canvas = this.el.unlockIcon;
+        const cx = canvas.getContext('2d');
+        const w = 80, h = 50;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        // Clear canvas
+        cx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Create gradient like the real soap
+        const grad = cx.createLinearGradient(centerX - w / 2, centerY - h / 2, centerX + w / 2, centerY + h / 2);
+        grad.addColorStop(0, skin.c1);
+        grad.addColorStop(1, skin.c2);
+
+        // Draw rounded rectangle (soap body)
+        cx.fillStyle = grad;
+        cx.beginPath();
+        const r = 12;
+        cx.moveTo(centerX - w / 2 + r, centerY - h / 2);
+        cx.arcTo(centerX + w / 2, centerY - h / 2, centerX + w / 2, centerY + h / 2, r);
+        cx.arcTo(centerX + w / 2, centerY + h / 2, centerX - w / 2, centerY + h / 2, r);
+        cx.arcTo(centerX - w / 2, centerY + h / 2, centerX - w / 2, centerY - h / 2, r);
+        cx.arcTo(centerX - w / 2, centerY - h / 2, centerX + w / 2, centerY - h / 2, r);
+        cx.closePath();
+        cx.fill();
+
+        // Border
+        cx.strokeStyle = skin.c2;
+        cx.lineWidth = 2;
+        cx.stroke();
+
+        // Top highlight (glossy effect)
+        cx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        cx.beginPath();
+        cx.roundRect(centerX - w / 2 + 8, centerY - h / 2 + 5, w - 16, h * 0.25, 4);
+        cx.fill();
+
+        // Text "SAVON YVARD"
+        cx.font = '700 8px Spinnaker, sans-serif';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillStyle = 'rgba(0,0,0,0.15)';
+        cx.fillText('SAVON YVARD', centerX + 0.5, centerY + 1.5);
+        cx.fillStyle = skin.c2;
+        cx.fillText('SAVON YVARD', centerX, centerY + 1);
 
         // Handlers
         this.el.equipBtn.onclick = () => {
@@ -83,14 +112,24 @@ const UI = {
             this.closeUnlockModal();
         };
 
+        // Restart confetti animation by cloning nodes
+        const confettiContainer = document.getElementById('unlockConfetti');
+        if (confettiContainer) {
+            const spans = confettiContainer.querySelectorAll('span');
+            spans.forEach(span => {
+                const newSpan = span.cloneNode(true);
+                span.parentNode.replaceChild(newSpan, span);
+            });
+        }
+
         // Show
         this.el.unlockModal.classList.add('open', 'unlocking');
         this.el.unlockModal.setAttribute('aria-hidden', 'false');
 
-        // Remove animation class after plays
+        // Keep animation class longer for better effect
         setTimeout(() => {
             this.el.unlockModal.classList.remove('unlocking');
-        }, 1000);
+        }, 3000);
     },
 
     closeUnlockModal() {

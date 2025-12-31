@@ -267,12 +267,28 @@ const Renderer = {
         // 1. Hills (Furthest)
         cx.fillStyle = this._mixColor(theme.bg1, '#000000', 0.05); // 5% darker than bg
         cx.beginPath();
-        cx.moveTo(0, H);
+        cx.moveTo(0, H); // Start bottom-left
+
+        // Ensure we start from the left edge
+        if (this._hills.length > 0) {
+            // Draw from x=0 with the first hill's Y value
+            const firstHill = this._hills[0];
+            cx.lineTo(0, H - CONFIG.ground.height - 50 + firstHill.y);
+        }
+
+        // Draw all hill points
         for (const p of this._hills) {
             cx.lineTo(p.x, H - CONFIG.ground.height - 50 + p.y);
         }
-        cx.lineTo(W, H);
-        cx.lineTo(0, H);
+
+        // Ensure we end at the right edge
+        if (this._hills.length > 0) {
+            const lastHill = this._hills[this._hills.length - 1];
+            cx.lineTo(W, H - CONFIG.ground.height - 50 + lastHill.y);
+        }
+
+        cx.lineTo(W, H); // Bottom-right
+        cx.closePath();
         cx.fill();
 
         // 2. Stars / Clouds

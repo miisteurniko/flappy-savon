@@ -51,7 +51,10 @@ body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: auto;
+  /* Changed from touch to auto to prevent bounce */
+  overflow: hidden;
+  /* Extra protection */
 }
 
 /* ===== Layout ===== */
@@ -177,6 +180,18 @@ canvas {
 .menu-btn svg {
   color: var(--ink);
   opacity: 0.8;
+}
+
+/* Version tag - very discrete in drawer */
+.version-tag {
+  display: block;
+  text-align: center;
+  font-size: 9px;
+  color: rgba(44, 36, 32, 0.25);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  padding-bottom: 20px;
 }
 
 /* Replay button removed */
@@ -1063,6 +1078,37 @@ canvas {
 /* Unlocking Animation */
 .modal.unlocking .card {
   animation: popInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Glow effect behind the soap */
+.modal.unlocking .card::before {
+  content: '';
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 100px;
+  background: radial-gradient(ellipse at center, rgba(212, 160, 55, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateX(-50%) scale(1.15);
+    opacity: 1;
+  }
 }
 
 @keyframes popInBounce {
@@ -1075,6 +1121,157 @@ canvas {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* Confetti container */
+.unlock-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.unlock-confetti span {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall 3s ease-in forwards;
+  opacity: 0;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(400px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Generate confetti pieces with different delays and positions */
+.unlock-confetti span:nth-child(1) {
+  left: 10%;
+  background: #ff6b6b;
+  animation-delay: 0s;
+}
+
+.unlock-confetti span:nth-child(2) {
+  left: 20%;
+  background: #4ecdc4;
+  animation-delay: 0.1s;
+}
+
+.unlock-confetti span:nth-child(3) {
+  left: 30%;
+  background: #ffe66d;
+  animation-delay: 0.05s;
+}
+
+.unlock-confetti span:nth-child(4) {
+  left: 40%;
+  background: #95e1d3;
+  animation-delay: 0.15s;
+}
+
+.unlock-confetti span:nth-child(5) {
+  left: 50%;
+  background: #f38181;
+  animation-delay: 0.08s;
+}
+
+.unlock-confetti span:nth-child(6) {
+  left: 60%;
+  background: #aa96da;
+  animation-delay: 0.12s;
+}
+
+.unlock-confetti span:nth-child(7) {
+  left: 70%;
+  background: #fcbad3;
+  animation-delay: 0.03s;
+}
+
+.unlock-confetti span:nth-child(8) {
+  left: 80%;
+  background: #a8d8ea;
+  animation-delay: 0.18s;
+}
+
+.unlock-confetti span:nth-child(9) {
+  left: 90%;
+  background: #ffaaa5;
+  animation-delay: 0.07s;
+}
+
+.unlock-confetti span:nth-child(10) {
+  left: 15%;
+  background: #dcedc1;
+  animation-delay: 0.2s;
+}
+
+.unlock-confetti span:nth-child(11) {
+  left: 25%;
+  background: #ffd93d;
+  animation-delay: 0.25s;
+}
+
+.unlock-confetti span:nth-child(12) {
+  left: 35%;
+  background: #6bcb77;
+  animation-delay: 0.22s;
+}
+
+.unlock-confetti span:nth-child(13) {
+  left: 45%;
+  background: #ff6b6b;
+  animation-delay: 0.28s;
+}
+
+.unlock-confetti span:nth-child(14) {
+  left: 55%;
+  background: #4ecdc4;
+  animation-delay: 0.3s;
+}
+
+.unlock-confetti span:nth-child(15) {
+  left: 65%;
+  background: #ffe66d;
+  animation-delay: 0.35s;
+}
+
+.unlock-confetti span:nth-child(16) {
+  left: 75%;
+  background: #aa96da;
+  animation-delay: 0.32s;
+}
+
+.unlock-confetti span:nth-child(17) {
+  left: 85%;
+  background: #fcbad3;
+  animation-delay: 0.38s;
+}
+
+.unlock-confetti span:nth-child(18) {
+  left: 5%;
+  background: #a8d8ea;
+  animation-delay: 0.4s;
+}
+
+.unlock-confetti span:nth-child(19) {
+  left: 95%;
+  background: #95e1d3;
+  animation-delay: 0.42s;
+}
+
+.unlock-confetti span:nth-child(20) {
+  left: 50%;
+  background: #f38181;
+  animation-delay: 0.45s;
 }
 
 /* ===== Stats Modal ===== */

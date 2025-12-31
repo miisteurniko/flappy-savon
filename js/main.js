@@ -53,6 +53,23 @@
         Game.flap();
     }, { passive: false });
 
+    // Block ALL touch movement on canvas to prevent iOS rubber-banding
+    canvas.addEventListener('touchstart', (e) => {
+        if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+        if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+
+    // Also block on document level to prevent any scroll/bounce
+    document.addEventListener('touchmove', (e) => {
+        // Only prevent if touching the game area
+        if (e.target === canvas || e.target.closest('.wrap')) {
+            if (e.cancelable) e.preventDefault();
+        }
+    }, { passive: false });
+
 
 
     // Menu drawer toggle
