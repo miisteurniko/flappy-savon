@@ -252,6 +252,10 @@ export default function Dashboard() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
+                  <Tooltip
+                    formatter={(val) => [val, 'Parties']}
+                    contentStyle={{ borderRadius: 12, border: '1px solid #e8e3db' }}
+                  />
                   <text x="50%" y="45%" textAnchor="middle" fill="#7a7265" fontSize={12}>Total</text>
                   <text x="50%" y="58%" textAnchor="middle" fill="#2c2416" fontSize={20} fontWeight="bold">{totalGamesForPie}</text>
                 </PieChart>
