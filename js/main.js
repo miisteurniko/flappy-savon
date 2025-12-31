@@ -434,17 +434,6 @@
         if (!hasId && !done) {
             // Small delay to ensure layout is stable
             setTimeout(() => UI.openIdentityModal(), 100);
-        } else if (!hasId && done) {
-            // User is guest (onboarded but no email)
-            setTimeout(() => {
-                const toast = document.createElement('div');
-                toast.className = 'toast show';
-                toast.style.top = '80px';
-                toast.style.bottom = 'auto';
-                toast.textContent = 'Mode Invité - Menu > Mon compte pour s\'inscrire';
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 4000);
-            }, 1000);
         }
     }
 

@@ -125,12 +125,11 @@ const Renderer = {
 
         // Animate Decor
         if (this._isNight) {
-            // Twinkle stars using sine wave
-            for (let i = 0; i < this._stars.length; i++) {
-                const s = this._stars[i];
-                // Clamp alpha between 0.1 and 0.8 to ensure visibility
-                const sineVal = Math.sin((this._t * s.speed) + i);
-                s.alpha = 0.4 + 0.3 * sineVal; // Range 0.1 to 0.7
+            // Twinkle stars
+            for (const s of this._stars) {
+                s.alpha += s.speed * (Math.random() < 0.5 ? 1 : -1);
+                if (s.alpha < 0.2) s.alpha = 0.2;
+                if (s.alpha > 0.8) s.alpha = 0.8;
             }
         } else {
             // Move clouds (parallax)
@@ -179,21 +178,14 @@ const Renderer = {
         const H = CONFIG.canvas.height;
         const speed = CONFIG.physics.scrollSpeed * dt;
 
-        // Check spawn every 10 frames (6 times per second at 60fps)
-        if (this._t % 10 !== 0) {
-            // Just update existing critters
-            this._updateCritters(dt, speed);
-            return;
-        }
-
         // Count active critters
         let activeCount = 0;
-        for (let i = 0; i < this._critters.length; i++) {
-            if (this._critters[i].active) activeCount++;
+        for (const c of this._critters) {
+            if (c.active) activeCount++;
         }
 
-        // Spawn logic - try to keep birds active
-        if (activeCount < 5 && Math.random() < 0.15) {
+        // Spawn logic (rare) - reuse inactive slot
+        if (activeCount < 5 && Math.random() < 0.005) {
             // Find inactive critter
             for (const c of this._critters) {
                 if (c.active) continue;
@@ -219,13 +211,8 @@ const Renderer = {
             }
         }
 
-        // Move & deactivate existing critters
-        this._updateCritters(dt, speed);
-    },
-
-    _updateCritters(dt, speed) {
-        for (let i = 0; i < this._critters.length; i++) {
-            const c = this._critters[i];
+        // Move & deactivate (no splice)
+        for (const c of this._critters) {
             if (!c.active) continue;
 
             c.x += c.vx;
@@ -237,7 +224,7 @@ const Renderer = {
                 c.flap += 0.2 * dt;
             }
 
-            if (c.x < -20) c.active = false;
+            if (c.x < -20) c.active = false; // Deactivate instead of splice
         }
     },
 
@@ -333,8 +320,6 @@ const Renderer = {
 
         // 3. Critters
         for (const c of this._critters) {
-            if (!c.active) continue; // Skip inactive critters regarding of type
-
             if (c.type === 'firefly') {
                 cx.fillStyle = '#ffffaa';
                 cx.shadowColor = '#ffffaa';
@@ -344,12 +329,12 @@ const Renderer = {
                 cx.fill();
                 cx.shadowBlur = 0;
             } else if (c.type === 'bird') {
-                cx.fillStyle = 'rgba(0,0,0,0.6)'; // Much darker silhouette
+                cx.fillStyle = 'rgba(0,0,0,0.2)'; // Dark silhouette
                 cx.beginPath();
-                const wingY = Math.sin(c.flap) * 5; // More flap amplitude
+                const wingY = Math.sin(c.flap) * 3;
                 cx.moveTo(c.x, c.y);
-                cx.lineTo(c.x + 8, c.y - wingY); // Wider wings
-                cx.lineTo(c.x + 16, c.y); // Longer body
+                cx.lineTo(c.x + 5, c.y - wingY);
+                cx.lineTo(c.x + 10, c.y);
                 cx.fill();
             }
         }
