@@ -174,8 +174,8 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] tracking-tight mb-1">Tableau de bord</h1>
-            <p className="text-gray-500 font-medium">Aperçu de la production, des stocks et des ventes.</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] tracking-tight mb-1">Statistiques Flappy Savon</h1>
+            <p className="text-gray-500 font-medium">Suivi des joueurs, scores et performances.</p>
           </div>
           <div className="flex items-center gap-3">
             <DateRangeSelector value={dateRange} onChange={setDateRange} />
