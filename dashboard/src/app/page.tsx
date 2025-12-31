@@ -240,38 +240,29 @@ export default function Dashboard() {
             <h3 className="font-semibold text-[#2c2416] mb-4">Répartition des scores</h3>
             <div className="flex items-center justify-center">
               <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                    nameKey="name"
-                  >
+                <BarChart data={pieData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e8e3db" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: '#7a7265' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 11, fill: '#7a7265' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: '#f5f0e8' }}
+                    formatter={(val) => [val, 'Parties']}
+                    contentStyle={{ borderRadius: 12, border: '1px solid #e8e3db' }}
+                  />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(val, name) => [val, `Score ${name}`]}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #e8e3db' }}
-                  />
-                  <text x="50%" y="45%" textAnchor="middle" fill="#7a7265" fontSize={12}>Total</text>
-                  <text x="50%" y="58%" textAnchor="middle" fill="#2c2416" fontSize={20} fontWeight="bold">{totalGamesForPie}</text>
-                </PieChart>
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap justify-center gap-3 mt-2">
-              {pieData.map((item, i) => (
-                <div key={i} className="flex items-center gap-1 text-xs">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-[#7a7265]">{item.name}</span>
-                </div>
-              ))}
-            </div>
+            <div className="h-4"></div>
           </div>
         </div>
 
