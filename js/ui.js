@@ -281,6 +281,11 @@ const UI = {
 
         this.el.idModal.classList.add('open');
         this.el.idModal.setAttribute('aria-hidden', 'false');
+
+        // Track modal open
+        if (typeof Analytics !== 'undefined') {
+            Analytics.track('modal_open', { name: 'identity', tab: defaultTab });
+        }
     },
 
     closeIdentityModal() {
@@ -319,6 +324,10 @@ const UI = {
                 optinRow.classList.add('shake');
                 setTimeout(() => optinRow.classList.remove('shake'), 600);
             }
+            // Track failed attempt
+            if (typeof Analytics !== 'undefined') {
+                Analytics.track('registration_attempt', { success: false, error: 'optin_missing' });
+            }
             return false;
         }
 
@@ -326,6 +335,11 @@ const UI = {
         localStorage.setItem('email', email);
         localStorage.setItem('optin_email', optin ? '1' : '0');
         this.showToast('Compte enregistré ✓');
+
+        // Track successful registration
+        if (typeof Analytics !== 'undefined') {
+            Analytics.track('registration_complete', { has_optin: optin });
+        }
         return true;
     },
 
@@ -480,6 +494,11 @@ const UI = {
     // === SOCIAL SHARE ===
 
     async shareScore(score, best) {
+        // Track share click
+        if (typeof Analytics !== 'undefined') {
+            Analytics.track('share_click', { score: score, best: best });
+        }
+
         const text = `🎮 J'ai fait ${score} points sur Flappy Savon ! Mon record : ${best} pts. Tu peux faire mieux ? 🧼`;
         const url = 'https://flappy-savon.vercel.app/';
 

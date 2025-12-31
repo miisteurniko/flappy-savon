@@ -20,6 +20,7 @@
     // ===== Initialize Modules =====
     UI.init();
     Game.init();
+    Analytics.init();
 
     // Update UI with stored values
     UI.updateBest(best);
@@ -48,6 +49,11 @@
         // Use setPointerCapture if available to handle "drag out" issues
         if (canvas.setPointerCapture) {
             try { canvas.setPointerCapture(e.pointerId); } catch (e) { }
+        }
+
+        // Track game start on first flap
+        if (!Game.isAlive() && !Game.isGameOver()) {
+            Analytics.trackGameStart();
         }
 
         Game.flap();
@@ -319,6 +325,9 @@
 
     function handleDeath() {
         Game.die();
+
+        // Track analytics
+        Analytics.trackGameEnd(Game.getScore());
 
         // Update bests
         const score = Game.getScore();
