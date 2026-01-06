@@ -188,7 +188,7 @@ export async function resetContestScores() {
 export async function getSessionsDetail(range: DateRange) {
     const startDate = getStartDate(range);
 
-    // Get all users for lookup
+    // Get all users for lookup (fallback if pseudo not in event data)
     const { data: users } = await supabase.from('scores').select('email, pseudo');
     const userMap = new Map((users || []).map(u => [u.email?.toLowerCase(), u.pseudo]));
 
@@ -205,11 +205,12 @@ export async function getSessionsDetail(range: DateRange) {
     const { data } = await query;
     return (data || []).map(e => {
         const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-        const email = d?.email?.toLowerCase();
+        // Try to get pseudo from event data first, then from lookup
+        const pseudo = d?.pseudo || (d?.email ? userMap.get(d.email.toLowerCase()) : null);
         return {
             session_id: e.session_id,
             created_at: e.created_at,
-            pseudo: email ? (userMap.get(email) || 'Visiteur') : 'Visiteur',
+            pseudo: pseudo || 'Visiteur',
             data: d
         };
     });
@@ -218,7 +219,7 @@ export async function getSessionsDetail(range: DateRange) {
 export async function getGamesDetail(range: DateRange) {
     const startDate = getStartDate(range);
 
-    // Get all users for lookup
+    // Get all users for lookup (fallback if pseudo not in event data)
     const { data: users } = await supabase.from('scores').select('email, pseudo');
     const userMap = new Map((users || []).map(u => [u.email?.toLowerCase(), u.pseudo]));
 
@@ -235,11 +236,12 @@ export async function getGamesDetail(range: DateRange) {
     const { data } = await query;
     return (data || []).map(e => {
         const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-        const email = d?.email?.toLowerCase();
+        // Try to get pseudo from event data first, then from lookup
+        const pseudo = d?.pseudo || (d?.email ? userMap.get(d.email.toLowerCase()) : null);
         return {
             session_id: e.session_id,
             created_at: e.created_at,
-            pseudo: email ? (userMap.get(email) || 'Visiteur') : 'Visiteur',
+            pseudo: pseudo || 'Visiteur',
             score: d?.score || 0,
             duration_ms: d?.duration_ms || 0
         };

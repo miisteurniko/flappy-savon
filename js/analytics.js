@@ -24,7 +24,9 @@ const Analytics = {
             referrer: document.referrer || 'direct',
             device: this._getDeviceType(),
             returning: !!localStorage.getItem('flappySavonSkin'),
-            screen: `${window.innerWidth}x${window.innerHeight}`
+            screen: `${window.innerWidth}x${window.innerHeight}`,
+            email: localStorage.getItem('email') || null,
+            pseudo: localStorage.getItem('pseudo') || null
         });
 
         console.log('[Analytics] Session started:', this._sessionId);
@@ -96,10 +98,15 @@ const Analytics = {
         const duration = Date.now() - this._gameStart;
         this._gameStart = null; // Reset for next game
 
+        const email = localStorage.getItem('email');
+        const pseudo = localStorage.getItem('pseudo');
+
         this.track('game_end', {
             score: score,
             duration_ms: duration,
-            is_registered: !!localStorage.getItem('email')
+            is_registered: !!email,
+            email: email || null,
+            pseudo: pseudo || null
         });
     },
 
