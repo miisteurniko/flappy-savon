@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getDashboardStats, DashboardStats, DateRange, getDateRangeLabel, getConfig, updateConfig, getContestParticipants, resetContestScores } from '@/lib/supabase';
+import { getDashboardStats, DashboardStats, DateRange, getDateRangeLabel, getConfig, updateConfig, getContestParticipants, resetContestScores, getSessionsDetail, getGamesDetail, getRegistrationsDetail } from '@/lib/supabase';
 import {
   LineChart,
   Line,
@@ -83,6 +83,115 @@ function DateRangeSelector({ value, onChange }: { value: DateRange; onChange: (v
       </select>
       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+      </div>
+    </div>
+  );
+}
+
+type DetailModalType = 'sessions' | 'games' | 'registrations' | null;
+
+function DetailModal({ type, dateRange, onClose }: { type: DetailModalType; dateRange: DateRange; onClose: () => void }) {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!type) return;
+    setLoading(true);
+    const fetchData = async () => {
+      try {
+        let result: any[] = [];
+        if (type === 'sessions') result = await getSessionsDetail(dateRange);
+        else if (type === 'games') result = await getGamesDetail(dateRange);
+        else if (type === 'registrations') result = await getRegistrationsDetail(dateRange);
+        setData(result);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [type, dateRange]);
+
+  const titles: Record<string, string> = {
+    sessions: 'Détail des Sessions',
+    games: 'Détail des Parties',
+    registrations: 'Détail des Inscriptions'
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-[32px] p-8 max-w-2xl w-full shadow-2xl max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">{titles[type!]}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div></div>
+        ) : (
+          <div className="overflow-y-auto flex-1">
+            <div className="text-sm text-gray-500 mb-4">{data.length} résultat(s)</div>
+
+            {type === 'sessions' && (
+              <div className="space-y-2">
+                {data.slice(0, 100).map((s, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
+                    <div className="font-mono text-xs text-gray-500 truncate max-w-[200px]">{s.session_id}</div>
+                    <div className="text-sm text-gray-700">
+                      {new Date(s.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {type === 'games' && (
+              <div className="space-y-2">
+                {data.slice(0, 100).map((g, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">🎮</span>
+                      <div>
+                        <div className="font-bold text-gray-900">Score: {g.score}</div>
+                        <div className="text-xs text-gray-500">{Math.round(g.duration_ms / 1000)}s</div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-700">
+                      {new Date(g.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {type === 'registrations' && (
+              <div className="space-y-2">
+                {data.slice(0, 100).map((u: any) => (
+                  <div key={u.id} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">
+                        {(u.pseudo || 'A')[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900">{u.pseudo || 'Anonyme'}</div>
+                        <div className="text-xs text-gray-500">{u.email}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-gray-900">Best: {u.best || 0}</div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(u.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -409,6 +518,7 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [contestConfig, setContestConfig] = useState<{ start: string, end: string } | null>(null);
+  const [detailModal, setDetailModal] = useState<DetailModalType>(null);
 
   useEffect(() => {
     const auth = localStorage.getItem('flappy_admin_auth');
@@ -465,6 +575,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6 font-sans">
       {showConfig && <ConfigModal onClose={() => setShowConfig(false)} onSave={fetchConfigData} />}
+      {detailModal && <DetailModal type={detailModal} dateRange={dateRange} onClose={() => setDetailModal(null)} />}
 
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
@@ -504,9 +615,9 @@ export default function Dashboard() {
             subtitle="Cliquez pour configurer les dates"
             onClick={() => setShowConfig(true)}
           />
-          <KPICard iconKey="users" title="SESSIONS" value={stats.totalSessions} subtitle={`+${stats.sessionsPerDay.length > 0 ? stats.sessionsPerDay[stats.sessionsPerDay.length - 1].count : 0} auj.`} />
-          <KPICard iconKey="store" title="PARTIES" value={stats.totalGames} subtitle="Ça joue dur !" />
-          <KPICard iconKey="chart" title="CONVERSION" value={`${stats.conversionRate.toFixed(1)}%`} subtitle="Inscr. / Sessions" />
+          <KPICard iconKey="users" title="SESSIONS" value={stats.totalSessions} subtitle="Cliquez pour voir" onClick={() => setDetailModal('sessions')} />
+          <KPICard iconKey="store" title="PARTIES" value={stats.totalGames} subtitle="Cliquez pour voir" onClick={() => setDetailModal('games')} />
+          <KPICard iconKey="chart" title="CONVERSION" value={`${stats.conversionRate.toFixed(1)}%`} subtitle="Cliquez pour voir" onClick={() => setDetailModal('registrations')} />
           <KPICard iconKey="timer" title="DURÉE MOY." value={`${stats.avgGameDuration}s`} subtitle="Par partie" />
         </div>
 

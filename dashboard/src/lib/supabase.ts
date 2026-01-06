@@ -183,3 +183,84 @@ export async function resetContestScores() {
     const { error } = await supabase.rpc('reset_contest_scores');
     if (error) throw error;
 }
+
+// Detail functions for KPI modals
+export async function getSessionsDetail(range: DateRange) {
+    const startDate = getStartDate(range);
+
+    let query = supabase
+        .from('analytics_events')
+        .select('session_id, created_at, data')
+        .eq('event', 'session_start')
+        .order('created_at', { ascending: false });
+
+    if (range !== 'all') {
+        query = query.gte('created_at', startDate.toISOString());
+    }
+
+    const { data } = await query;
+    return (data || []).map(e => ({
+        session_id: e.session_id,
+        created_at: e.created_at,
+        data: typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+    }));
+}
+
+export async function getGamesDetail(range: DateRange) {
+    const startDate = getStartDate(range);
+
+    let query = supabase
+        .from('analytics_events')
+        .select('session_id, created_at, data')
+        .eq('event', 'game_end')
+        .order('created_at', { ascending: false });
+
+    if (range !== 'all') {
+        query = query.gte('created_at', startDate.toISOString());
+    }
+
+    const { data } = await query;
+    return (data || []).map(e => {
+        const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        return {
+            session_id: e.session_id,
+            created_at: e.created_at,
+            score: d?.score || 0,
+            duration_ms: d?.duration_ms || 0
+        };
+    });
+}
+
+export async function getRegistrationsDetail(range: DateRange) {
+    const startDate = getStartDate(range);
+
+    let query = supabase
+        .from('scores')
+        .select('id, pseudo, email, created_at, optin, best')
+        .order('created_at', { ascending: false });
+
+    if (range !== 'all') {
+        query = query.gte('created_at', startDate.toISOString());
+    }
+
+    const { data } = await query;
+    return data || [];
+}
+
+function getStartDate(range: DateRange): Date {
+    const now = new Date();
+    switch (range) {
+        case 'today':
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        case '7d':
+            return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        case '14d':
+            return new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        case '30d':
+            return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        case 'all':
+        default:
+            return new Date('2024-01-01');
+    }
+}
+
