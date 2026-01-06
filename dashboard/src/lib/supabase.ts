@@ -188,6 +188,10 @@ export async function resetContestScores() {
 export async function getSessionsDetail(range: DateRange) {
     const startDate = getStartDate(range);
 
+    // Get all users for lookup
+    const { data: users } = await supabase.from('scores').select('email, pseudo');
+    const userMap = new Map((users || []).map(u => [u.email?.toLowerCase(), u.pseudo]));
+
     let query = supabase
         .from('analytics_events')
         .select('session_id, created_at, data')
@@ -199,15 +203,24 @@ export async function getSessionsDetail(range: DateRange) {
     }
 
     const { data } = await query;
-    return (data || []).map(e => ({
-        session_id: e.session_id,
-        created_at: e.created_at,
-        data: typeof e.data === 'string' ? JSON.parse(e.data) : e.data
-    }));
+    return (data || []).map(e => {
+        const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        const email = d?.email?.toLowerCase();
+        return {
+            session_id: e.session_id,
+            created_at: e.created_at,
+            pseudo: email ? (userMap.get(email) || 'Visiteur') : 'Visiteur',
+            data: d
+        };
+    });
 }
 
 export async function getGamesDetail(range: DateRange) {
     const startDate = getStartDate(range);
+
+    // Get all users for lookup
+    const { data: users } = await supabase.from('scores').select('email, pseudo');
+    const userMap = new Map((users || []).map(u => [u.email?.toLowerCase(), u.pseudo]));
 
     let query = supabase
         .from('analytics_events')
@@ -222,9 +235,11 @@ export async function getGamesDetail(range: DateRange) {
     const { data } = await query;
     return (data || []).map(e => {
         const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        const email = d?.email?.toLowerCase();
         return {
             session_id: e.session_id,
             created_at: e.created_at,
+            pseudo: email ? (userMap.get(email) || 'Visiteur') : 'Visiteur',
             score: d?.score || 0,
             duration_ms: d?.duration_ms || 0
         };

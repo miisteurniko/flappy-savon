@@ -139,7 +139,12 @@ function DetailModal({ type, dateRange, onClose }: { type: DetailModalType; date
               <div className="space-y-2">
                 {data.slice(0, 100).map((s, i) => (
                   <div key={i} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
-                    <div className="font-mono text-xs text-gray-500 truncate max-w-[200px]">{s.session_id}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">
+                        {(s.pseudo || 'V')[0].toUpperCase()}
+                      </div>
+                      <div className="font-bold text-gray-900">{s.pseudo || 'Visiteur'}</div>
+                    </div>
                     <div className="text-sm text-gray-700">
                       {new Date(s.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -153,10 +158,12 @@ function DetailModal({ type, dateRange, onClose }: { type: DetailModalType; date
                 {data.slice(0, 100).map((g, i) => (
                   <div key={i} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">🎮</span>
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">
+                        {(g.pseudo || 'V')[0].toUpperCase()}
+                      </div>
                       <div>
-                        <div className="font-bold text-gray-900">Score: {g.score}</div>
-                        <div className="text-xs text-gray-500">{Math.round(g.duration_ms / 1000)}s</div>
+                        <div className="font-bold text-gray-900">{g.pseudo || 'Visiteur'}</div>
+                        <div className="text-xs text-gray-500">Score: {g.score} • {Math.round(g.duration_ms / 1000)}s</div>
                       </div>
                     </div>
                     <div className="text-sm text-gray-700">
