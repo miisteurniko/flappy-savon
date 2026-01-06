@@ -428,7 +428,7 @@
                     badges: Object.keys(unlockedBadges).map(k => Number(k))
                 });
 
-                const rows = await API.loadLeaderboard();
+                const rows = await API.loadLeaderboard('contest');
                 if (rows) {
                     const email = localStorage.getItem('email');
                     const rank = API.computeRank(rows, email, best);
@@ -480,7 +480,7 @@
     // ===== Leaderboard Auto-refresh =====
 
     async function refreshLeaderboard() {
-        const rows = await API.loadLeaderboard();
+        const rows = await API.loadLeaderboard('contest');
         if (rows) {
             const email = localStorage.getItem('email');
             const rank = API.computeRank(rows, email, best);
@@ -499,10 +499,10 @@
     // Handle Leaderboard Refresh Event from UI tabs
     window.addEventListener('refresh-leaderboard', async () => {
         try {
-            const rows = await API.loadLeaderboard();
+            const rows = await API.loadLeaderboard('contest');
             if (rows) {
                 const myEmail = localStorage.getItem('email');
-                UI.renderLeaderboard(rows, myEmail);
+                UI.renderLeaderboard(rows, myEmail, 'contest');
             } else {
                 UI.setLeaderboardError();
             }

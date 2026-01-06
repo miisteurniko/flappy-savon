@@ -38,7 +38,7 @@ const API = {
     },
 
     // Load leaderboard from Supabase
-    async loadLeaderboard(type = 'general') {
+    async loadLeaderboard(type = 'contest') {
         try {
             // Pass the type ('contest' or 'general') to Supabase
             const data = await Supabase.getLeaderboard(10, type);
