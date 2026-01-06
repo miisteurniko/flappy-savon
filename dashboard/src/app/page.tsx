@@ -145,7 +145,7 @@ function DetailModal({ type, dateRange, onClose }: { type: DetailModalType; date
                       </div>
                       <div>
                         <div className="font-bold text-gray-900">{s.pseudo || 'Visiteur'}</div>
-                        {s.games_count <= 15 && (
+                        {s.pseudo && s.pseudo !== 'Visiteur' && (
                           <div className="text-xs text-gray-500">{s.games_count || 0} partie{s.games_count !== 1 ? 's' : ''}</div>
                         )}
                       </div>
