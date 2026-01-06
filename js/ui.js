@@ -54,6 +54,20 @@ const UI = {
         this.initTabs();
         this.initLeaderboardTabs();
 
+        // Re-render leaderboard when config is loaded (for prizes)
+        window.addEventListener('flappy-config-loaded', () => {
+            const container = document.getElementById('modalLeaderboard');
+            // Only re-render if leaderboard is visible and has content
+            if (container && container.children.length > 0) {
+                const activeTab = document.querySelector('.lb-tab.active');
+                const type = activeTab?.dataset?.type || 'contest';
+                API.loadLeaderboard(type).then(rows => {
+                    const email = localStorage.getItem('email');
+                    this.renderLeaderboard(rows, email, type);
+                });
+            }
+        });
+
         // Connected logic
         if (this.el.idEditBtn) {
             this.el.idEditBtn.addEventListener('click', () => {
@@ -485,7 +499,7 @@ const UI = {
         this.openIdentityModal('ranking');
     },
 
-    renderLeaderboard(rows, currentEmail) {
+    renderLeaderboard(rows, currentEmail, type = 'general') {
         // Render to the modal container
         const container = document.getElementById('modalLeaderboard');
         if (!container) return;
@@ -497,18 +511,38 @@ const UI = {
             return;
         }
 
+        // Show prizes if contest mode
+        if (type === 'contest' && CONFIG.contest.prizes && CONFIG.contest.prizes.length > 0) {
+            const prizesDiv = document.createElement('div');
+            prizesDiv.className = 'prizes-container';
+            prizesDiv.innerHTML = `
+                <h3>🎁 Lots à gagner</h3>
+                <div class="prizes-list">
+                    ${CONFIG.contest.prizes.map((p, i) => `
+                        <div class="prize-item">
+                            <span class="prize-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
+                            <span class="prize-name">${this._escapeHtml(p)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(prizesDiv);
+        }
+
         const emailLower = (currentEmail || '').toLowerCase();
 
         rows.slice(0, 50).forEach((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
             const isMe = emailLower && (String(r.email || '')).toLowerCase() === emailLower;
 
+            const score = type === 'contest' ? (r.contest_best || 0) : (r.best || r.score || 0);
+
             const div = document.createElement('div');
             div.className = 'lb-row' + (i === 0 ? ' top1' : '') + (isMe ? ' me' : '');
             div.innerHTML = `
         <div class="medal">${medal || (i + 1)}</div>
         <div class="lb-name">${this._escapeHtml(r.pseudo || 'Anonyme')}${isMe ? ' <span class="you-badge">Toi</span>' : ''}</div>
-        <div class="lb-score">${r.best ?? r.score ?? 0}</div>
+        <div class="lb-score">${score}</div>
       `;
             // Need to style lb-row if not already
             container.appendChild(div);
@@ -549,7 +583,7 @@ const UI = {
                 // Fetch data
                 const rows = await API.loadLeaderboard(type);
                 const email = localStorage.getItem('email');
-                this.renderLeaderboard(rows, email);
+                this.renderLeaderboard(rows, email, type);
             });
         });
     },
@@ -646,9 +680,15 @@ const UI = {
         const els = document.querySelectorAll('.countdown-timer');
         if (els.length === 0) return;
 
-        // January 31, 2026 at 23:59:59 local time
-        const endDate = new Date(2026, 0, 31, 23, 59, 59);
+        const endDate = new Date(CONFIG.contest.endDate);
         const now = new Date();
+
+        // If config not loaded yet (invalid date or default), show placeholder
+        if (isNaN(endDate.getTime())) {
+            els.forEach(el => { el.textContent = '-- jours'; });
+            return;
+        }
+
         const diff = endDate - now;
 
         let text = '';
@@ -667,9 +707,44 @@ const UI = {
         }
 
         els.forEach(el => {
-            // Preserve icon if it exists outside? No, just replace text.
             el.textContent = text;
         });
+    },
+
+    // === PRIZES ===
+
+    renderPrizes() {
+        const list = document.getElementById('prizesList');
+        const title = document.getElementById('prizesTitle');
+
+        if (CONFIG.contest.endDate && title) {
+            const date = new Date(CONFIG.contest.endDate);
+            if (!isNaN(date.getTime())) {
+                const month = date.toLocaleString('fr-FR', { month: 'long' });
+                title.textContent = `🏆 3 Gagnants le ${date.getDate()} ${month.charAt(0).toUpperCase() + month.slice(1)}`;
+            }
+        }
+
+        if (!list) return;
+
+        if (CONFIG.contest.prizes && CONFIG.contest.prizes.length > 0) {
+            list.innerHTML = CONFIG.contest.prizes.map((p, i) => `
+                <li>
+                    <span class="medal">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span> 
+                    <strong>Top ${i + 1} :</strong> ${this._escapeHtml(p)}
+                </li>
+            `).join('');
+        } else {
+            list.innerHTML = '<li class="muted">Aucun lot défini pour le moment.</li>';
+        }
+    },
+
+    // Public method to force refresh (after config load)
+    refreshTimer() {
+        // Update Prizes Tab
+        this.renderPrizes();
+        // Update all countdown timers
+        this._tickCountdown();
     },
 
     // === MUTE BUTTON ===

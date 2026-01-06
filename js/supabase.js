@@ -35,30 +35,51 @@ const Supabase = {
         }
 
         try {
+            // Check if within contest period
+            let isContest = false;
+            // Access CONFIG directly if available globally, otherwise might need validation
+            if (typeof CONFIG !== 'undefined' && CONFIG.contest) {
+                const now = new Date();
+                const start = new Date(CONFIG.contest.startDate);
+                const end = new Date(CONFIG.contest.endDate);
+                if (now >= start && now <= end) {
+                    isContest = true;
+                }
+            }
+
             // Try to get existing user
             const existing = await this.getByEmail(payload.email);
 
             if (existing) {
-                // Update only if best score improved
+                const updates = {
+                    score: payload.score,
+                    points: payload.points,
+                    badges: payload.badges,
+                    optin: payload.optin
+                };
+
+                // Update all-time best
                 if (payload.best > (existing.best || 0)) {
-                    return await this._update(existing.id, {
-                        pseudo: payload.pseudo,
-                        score: payload.score,
-                        best: payload.best,
-                        points: payload.points,
-                        badges: payload.badges,
-                        optin: payload.optin
-                    });
-                } else {
-                    // Update points and last score even if not best
-                    return await this._update(existing.id, {
-                        score: payload.score,
-                        points: payload.points,
-                        badges: payload.badges
-                    });
+                    updates.best = payload.best;
+                    updates.pseudo = payload.pseudo; // Update pseudo only on best score
                 }
+
+                // Update contest best if active and better
+                if (isContest) {
+                    const currentContestBest = existing.contest_best || 0;
+                    if (payload.score > currentContestBest) {
+                        updates.contest_best = payload.score;
+                        // Determine if this is the generic best too
+                        // If it's a new contest record, updates.contest_best is set.
+                    }
+                }
+
+                return await this._update(existing.id, updates);
             } else {
                 // Insert new user
+                if (isContest) {
+                    payload.contest_best = payload.score;
+                }
                 return await this._insert(payload);
             }
         } catch (e) {
@@ -102,13 +123,17 @@ const Supabase = {
         return await response.json();
     },
 
-    // Get leaderboard (top 10 by best score)
-    async getLeaderboard(limit = 10, minDate = null) {
+    // Get leaderboard
+    async getLeaderboard(limit = 10, type = 'general') {
         try {
-            let url = `${this._url}/rest/v1/scores?select=pseudo,email,best&order=best.desc&limit=${limit}`;
-            if (minDate) {
-                // Filter for new players (created after minDate)
-                url += `&created_at=gt.${minDate}`;
+            let url = `${this._url}/rest/v1/scores?select=pseudo,email,contest_best,best&limit=${limit}`;
+
+            if (type === 'contest') {
+                // Sort by contest_best, filter out 0
+                url += '&order=contest_best.desc,best.desc&contest_best=gt.0';
+            } else {
+                // General leaderboard (all time best)
+                url += '&order=best.desc';
             }
 
             const response = await fetch(url, { headers: this._headers() });

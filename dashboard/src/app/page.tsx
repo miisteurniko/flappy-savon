@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getDashboardStats, DashboardStats, DateRange, getDateRangeLabel } from '@/lib/supabase';
+import { getDashboardStats, DashboardStats, DateRange, getDateRangeLabel, getConfig, updateConfig, getContestParticipants, resetContestScores } from '@/lib/supabase';
 import {
   LineChart,
   Line,
@@ -39,12 +39,20 @@ const Icons = {
     <div className="p-3 bg-amber-100 rounded-2xl w-fit">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
     </div>
+  ),
+  calendar: (
+    <div className="p-3 bg-amber-100 rounded-2xl w-fit">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+    </div>
   )
 };
 
-function KPICard({ title, value, subtitle, iconKey }: { title: string; value: string | number; subtitle?: string; iconKey: keyof typeof Icons }) {
+function KPICard({ title, value, subtitle, iconKey, onClick }: { title: string; value: string | number; subtitle?: string; iconKey: keyof typeof Icons; onClick?: () => void }) {
   return (
-    <div className="bg-white rounded-[32px] p-6 shadow-sm flex flex-col justify-between h-full min-h-[180px]">
+    <div
+      onClick={onClick}
+      className={`bg-white rounded-[32px] p-6 shadow-sm flex flex-col justify-between h-full min-h-[180px] transition-all hover:shadow-md ${onClick ? 'cursor-pointer hover:scale-[1.02] ring-2 ring-transparent hover:ring-amber-400/50' : ''}`}
+    >
       <div className="flex items-start justify-between w-full">
         {Icons[iconKey]}
         <div className="text-right">
@@ -52,8 +60,8 @@ function KPICard({ title, value, subtitle, iconKey }: { title: string; value: st
         </div>
       </div>
       <div>
-        <div className="text-3xl font-bold text-[#1A1A1A] mt-4 mb-2">{value}</div>
-        {subtitle && <div className="text-sm text-green-600 font-medium">{subtitle}</div>}
+        <div className="text-2xl font-bold text-[#1A1A1A] mt-4 mb-2 truncate">{value}</div>
+        {subtitle && <div className={`text-sm font-medium ${onClick ? 'text-amber-600' : 'text-green-600'}`}>{subtitle}</div>}
       </div>
     </div>
   );
@@ -119,12 +127,288 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   );
 }
 
+function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
+  const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [webhookUrl, setWebhookUrl] = useState('https://n8n.miisteurniko.fr/webhook/0ea2cf71-d691-4df2-9c94-c289dcbd0fd9');
+
+  // Prizes
+  const [prize1, setPrize1] = useState('');
+  const [prize2, setPrize2] = useState('');
+  const [prize3, setPrize3] = useState('');
+
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getConfig().then(config => {
+      if (config.contest_start) setStartDate(config.contest_start.split('T')[0]);
+      if (config.contest_end) setEndDate(config.contest_end.split('T')[0]);
+      if (config.contest_webhook_url) setWebhookUrl(config.contest_webhook_url);
+
+      // Load prizes
+      if (config.contest_prize_1) setPrize1(config.contest_prize_1);
+      if (config.contest_prize_2) setPrize2(config.contest_prize_2);
+      if (config.contest_prize_3) setPrize3(config.contest_prize_3);
+
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    // Validations
+    if (!startDate || !endDate) return alert("Veuillez remplir les deux dates.");
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return alert("Date invalide.");
+    if (start > end) return alert("La date de début doit être avant la date de fin.");
+
+    setSaving(true);
+    end.setHours(23, 59, 59, 999);
+
+    try {
+      await updateConfig('contest_start', start.toISOString());
+      await updateConfig('contest_end', end.toISOString());
+      await updateConfig('contest_webhook_url', webhookUrl);
+
+      // Save prizes
+      await updateConfig('contest_prize_1', prize1);
+      await updateConfig('contest_prize_2', prize2);
+      await updateConfig('contest_prize_3', prize3);
+
+      onSave(); // Refresh parent
+      onClose();
+    } catch {
+      alert("Erreur serveur.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-[32px] p-8 max-w-lg w-full shadow-2xl scale-100 transform transition-all">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Configuration Concours</h2>
+            <p className="text-gray-500 text-sm mt-1">Définez la période active du jeu</p>
+          </div>
+          <div className="p-3 bg-amber-100 text-amber-600 rounded-2xl">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div></div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Date de début</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={e => setStartDate(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700"
+                  />
+                  <svg className="absolute left-3 top-3.5 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Date de fin</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={e => setEndDate(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700"
+                  />
+                  <svg className="absolute left-3 top-3.5 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y1="10" /></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Prizes Section */}
+            <div className="space-y-4 pt-4 border-t border-gray-100">
+              <h3 className="text-sm font-bold text-gray-900">Lots à gagner</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🥇</span>
+                  <input
+                    type="text"
+                    placeholder="Ex: 1 an de savon"
+                    value={prize1}
+                    onChange={e => setPrize1(e.target.value)}
+                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🥈</span>
+                  <input
+                    type="text"
+                    placeholder="Ex: Coffret découverte"
+                    value={prize2}
+                    onChange={e => setPrize2(e.target.value)}
+                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🥉</span>
+                  <input
+                    type="text"
+                    placeholder="Ex: Bon d'achat"
+                    value={prize3}
+                    onChange={e => setPrize3(e.target.value)}
+                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Webhook de fin (n8n)</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={webhookUrl}
+                  onChange={e => setWebhookUrl(e.target.value)}
+                  placeholder="https://n8n..."
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700 text-sm"
+                />
+                <svg className="absolute left-3 top-3.5 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+              </div>
+            </div>
+
+            {/* Duration Preview */}
+            {startDate && endDate && !isNaN(new Date(startDate).getTime()) && !isNaN(new Date(endDate).getTime()) && (
+              <div className="bg-amber-50 rounded-xl p-4 flex items-center gap-3 text-amber-800 text-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                <span>Durée du concours : <strong>{Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} jours</strong></span>
+              </div>
+            )}
+
+            <div className="pt-6 border-t border-gray-100 space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">Actions Concours</h3>
+                <p className="text-xs text-gray-500 mb-4">Gérez la fin de période : exportez les gagnants puis réinitialisez pour le prochain.</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    try {
+                      const loadingBtn = document.getElementById('btn-export-contest');
+                      if (loadingBtn) loadingBtn.innerText = 'Chargement...';
+                      const rows = await getContestParticipants();
+                      const csv = [
+                        ['Pseudo', 'Email', 'Score Concours', 'Newsletter'].join(','),
+                        ...rows.map((r: any) => [r.pseudo, r.email, r.contest_best, r.optin ? 'Oui' : 'Non'].join(','))
+                      ].join('\n');
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `concours-resultats-${new Date().toISOString().split('T')[0]}.csv`;
+                      a.click();
+                      if (loadingBtn) loadingBtn.innerText = 'Exporter Résultats';
+                    } catch (e) {
+                      alert("Erreur lors de l'export.");
+                    }
+                  }}
+                  id="btn-export-contest"
+                  className="flex-1 px-4 py-2 bg-green-50 text-green-700 font-semibold rounded-xl hover:bg-green-100 transition flex items-center justify-center gap-2 text-sm border border-green-200 cursor-pointer"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                  Exporter Résultats
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!webhookUrl) return alert("Veuillez configurer l'URL du Webhook.");
+                    const btn = document.getElementById('btn-webhook');
+                    if (btn) btn.innerText = 'Envoi...';
+
+                    try {
+                      const rows = await getContestParticipants();
+                      const payload = {
+                        contest_end: endDate,
+                        winners: rows,
+                        prizes: {
+                          rank1: prize1,
+                          rank2: prize2,
+                          rank3: prize3
+                        }
+                      };
+
+                      await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                      });
+                      alert("Données envoyées avec succès au Webhook !");
+                    } catch (e) {
+                      alert("Erreur lors de l'envoi au Webhook.");
+                      console.error(e);
+                    } finally {
+                      if (btn) btn.innerText = 'Envoyer via Webhook';
+                    }
+                  }}
+                  id="btn-webhook"
+                  className="flex-1 px-4 py-2 bg-blue-50 text-blue-700 font-semibold rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2 text-sm border border-blue-200 cursor-pointer"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                  Envoyer via Webhook
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm("ATTENTION : Cela va remettre à 0 tous les scores 'concours' de tous les joueurs.\n\nÊtes-vous sûr de vouloir démarrer une nouvelle période ?")) {
+                      try {
+                        await resetContestScores();
+                        alert("Scores réinitialisés avec succès !");
+                      } catch (e: any) {
+                        console.error(e);
+                        alert(`Erreur : ${e.message || e.error_description || JSON.stringify(e)}`);
+                      }
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-50 text-red-700 font-semibold rounded-xl hover:bg-red-100 transition flex items-center justify-center gap-2 text-sm border border-red-200 cursor-pointer"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                  Réinitialiser
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3 justify-end mt-10">
+          <button
+            onClick={onClose}
+            className="px-6 py-3 text-gray-500 font-semibold hover:bg-gray-50 rounded-xl transition"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || loading}
+            className="px-6 py-3 bg-[#1A1A1A] text-white font-semibold rounded-xl hover:bg-black transition flex items-center gap-2 shadow-lg shadow-gray-200 disabled:opacity-50"
+          >
+            {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+            {saving ? 'Sauvegarde...' : 'Enregistrer'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>('7d');
   const [refreshing, setRefreshing] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
+  const [contestConfig, setContestConfig] = useState<{ start: string, end: string } | null>(null);
 
   useEffect(() => {
     const auth = localStorage.getItem('flappy_admin_auth');
@@ -134,9 +418,18 @@ export default function Dashboard() {
     setLoading(false);
   }, []);
 
+  const fetchConfigData = async () => {
+    const cfg = await getConfig();
+    const start = cfg['contest_start'] ? new Date(cfg['contest_start']).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '--/--';
+    const end = cfg['contest_end'] ? new Date(cfg['contest_end']).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '--/--';
+    const year = cfg['contest_end'] ? new Date(cfg['contest_end']).getFullYear() : '';
+    setContestConfig({ start, end: end + (year ? `/${year}` : '') });
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadStats();
+      fetchConfigData();
       const interval = setInterval(loadStats, 60000); // Refresh every minute
       return () => clearInterval(interval);
     }
@@ -170,26 +463,31 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 p-4 md:p-6 font-sans">
+      {showConfig && <ConfigModal onClose={() => setShowConfig(false)} onSave={fetchConfigData} />}
+
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] tracking-tight mb-1">Statistiques Flappy Savon</h1>
-            <p className="text-gray-500 font-medium">Suivi des joueurs, scores et performances.</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] tracking-tight mb-2">Statistiques Flappy Savon</h1>
+            <p className="text-gray-500 font-medium text-lg">Suivi des joueurs, scores et performances.</p>
           </div>
           <div className="flex items-center gap-3">
             <DateRangeSelector value={dateRange} onChange={setDateRange} />
+
+            <div className="h-8 w-px bg-gray-200 mx-1"></div>
+
             <button
               onClick={loadStats}
               disabled={refreshing}
-              className={`p-2 bg-white rounded-full text-[#1A1A1A] hover:bg-gray-50 transition shadow-sm ${refreshing ? 'opacity-70 cursor-wait' : ''}`}
+              className={`p-2.5 bg-white rounded-full text-gray-700 hover:bg-gray-50 transition shadow-sm border border-gray-100 ${refreshing ? 'opacity-70 cursor-wait' : ''}`}
               title="Rafraîchir les données"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? "animate-spin" : ""}><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" /></svg>
             </button>
             <button
               onClick={() => { localStorage.removeItem('flappy_admin_auth'); setIsAuthenticated(false); }}
-              className="p-2 bg-white rounded-full text-red-500 hover:bg-red-50 transition shadow-sm"
+              className="p-2.5 bg-white rounded-full text-red-500 hover:bg-red-50 transition shadow-sm border border-gray-100"
               title="Déconnexion"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="3" y1="12" y2="12" /></svg>
@@ -198,11 +496,18 @@ export default function Dashboard() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <KPICard iconKey="users" title="SESSIONS" value={stats.totalSessions} subtitle={`+${stats.sessionsPerDay.length > 0 ? stats.sessionsPerDay[stats.sessionsPerDay.length - 1].count : 0} auj, une belle journée !`} />
-          <KPICard iconKey="store" title="PARTIES JOUÉES" value={stats.totalGames} subtitle="Ça joue dur !" />
-          <KPICard iconKey="chart" title="TAUX CONVERSION" value={`${stats.conversionRate.toFixed(1)}%`} subtitle="Inscriptions / Sessions" />
-          <KPICard iconKey="timer" title="DURÉE MOYENNE" value={`${stats.avgGameDuration}s`} subtitle="Par partie" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <KPICard
+            iconKey="calendar"
+            title="CONCOURS"
+            value={contestConfig ? `${contestConfig.start} → ${contestConfig.end}` : "Chargement..."}
+            subtitle="Cliquez pour configurer les dates"
+            onClick={() => setShowConfig(true)}
+          />
+          <KPICard iconKey="users" title="SESSIONS" value={stats.totalSessions} subtitle={`+${stats.sessionsPerDay.length > 0 ? stats.sessionsPerDay[stats.sessionsPerDay.length - 1].count : 0} auj.`} />
+          <KPICard iconKey="store" title="PARTIES" value={stats.totalGames} subtitle="Ça joue dur !" />
+          <KPICard iconKey="chart" title="CONVERSION" value={`${stats.conversionRate.toFixed(1)}%`} subtitle="Inscr. / Sessions" />
+          <KPICard iconKey="timer" title="DURÉE MOY." value={`${stats.avgGameDuration}s`} subtitle="Par partie" />
         </div>
 
         {/* Charts */}
@@ -271,47 +576,62 @@ export default function Dashboard() {
             <h3 className="font-bold text-xl text-[#1A1A1A]">Dernières inscriptions</h3>
             <button
               onClick={() => {
-                const csv = 'Pseudo,Email,Date\n' + stats.recentRegistrations
-                  .map(u => `"${u.pseudo || ''}","${u.email}","${new Date(u.created_at).toLocaleDateString('fr-FR')}"`)
-                  .join('\n');
+                const csv = [
+                  ['Pseudo', 'Email', 'Date', 'Opt-in'].join(','),
+                  ...stats.recentRegistrations.map(r => [
+                    r.pseudo,
+                    r.email,
+                    new Date(r.created_at).toLocaleString(),
+                    r.optin ? 'Oui' : 'Non'
+                  ].join(','))
+                ].join('\n');
                 const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
+                const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `emails_flappy_${new Date().toISOString().split('T')[0]}.csv`;
+                a.download = `flappy-inscriptions-${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
               }}
-              className="px-5 py-2.5 bg-[#4E8D6B] text-white rounded-full text-sm font-semibold hover:bg-[#3d7054] transition flex items-center gap-2 shadow-md shadow-green-900/10"
+              className="flex items-center gap-2 px-4 py-2 bg-[#346648] text-white rounded-full text-sm font-bold hover:bg-[#2a523a] transition cursor-pointer"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
               Exporter CSV
             </button>
           </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-gray-400 text-xs uppercase tracking-wider font-semibold border-b border-gray-100">
-                  <th className="pb-4 pl-4">Pseudo</th>
-                  <th className="pb-4">Email</th>
-                  <th className="pb-4">Date</th>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Joueur</th>
+                  <th className="text-left py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Email</th>
+                  <th className="text-right py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="text-right py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Newsletter</th>
                 </tr>
               </thead>
-              <tbody>
-                {stats.recentRegistrations.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="text-gray-400 py-4 text-center">Aucune inscription récente</td>
+              <tbody className="divide-y divide-gray-50">
+                {stats.recentRegistrations.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50 transition">
+                    <td className="py-4">
+                      <div className="font-bold text-[#1A1A1A]">{user.pseudo || 'Anonyme'}</div>
+                    </td>
+                    <td className="py-4 text-gray-600">{user.email}</td>
+                    <td className="py-4 text-right text-gray-500 text-sm">
+                      {new Date(user.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                    </td>
+                    <td className="py-4 text-right">
+                      {user.optin ?
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Oui
+                        </span>
+                        :
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Non
+                        </span>
+                      }
+                    </td>
                   </tr>
-                ) : (
-                  stats.recentRegistrations.map((user, i) => (
-                    <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition">
-                      <td className="py-4 pl-4 font-bold text-[#1A1A1A]">{user.pseudo || 'Anonyme'}</td>
-                      <td className="py-4 text-gray-500">{user.email}</td>
-                      <td className="py-4 text-gray-400 text-sm font-medium">
-                        {new Date(user.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

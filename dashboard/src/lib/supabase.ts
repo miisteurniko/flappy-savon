@@ -21,7 +21,7 @@ export interface DashboardStats {
     avgGameDuration: number;
     sessionsPerDay: { date: string; count: number }[];
     scoreDistribution: { range: string; count: number }[];
-    recentRegistrations: { pseudo: string; email: string; created_at: string }[];
+    recentRegistrations: { id: number; pseudo: string; email: string; created_at: string; optin: boolean }[];
 }
 
 export type DateRange = '7d' | '14d' | '30d' | 'today' | 'all';
@@ -129,7 +129,7 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
     // All registrations from scores table (no limit for export)
     const { data: recentUsers } = await supabase
         .from('scores')
-        .select('pseudo, email, created_at')
+        .select('id, pseudo, email, created_at, optin')
         .order('created_at', { ascending: false });
 
     return {
@@ -142,6 +142,44 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
         avgGameDuration: Math.round(avgDuration * 10) / 10,
         sessionsPerDay: sessionsArray,
         scoreDistribution,
-        recentRegistrations: recentUsers || [],
+        recentRegistrations: (recentUsers || []).map(u => ({ ...u, optin: !!u.optin })),
     };
+}
+
+export async function getConfig() {
+    const { data } = await supabase.from('app_config').select('key,value');
+    if (!data) return {};
+    return data.reduce((acc, row) => {
+        acc[row.key] = row.value;
+        return acc;
+    }, {} as Record<string, string>);
+}
+
+export async function updateConfig(key: string, value: string) {
+    // Upsert is safer: creates if missing, updates if exists.
+    // Handles 'key' uniqueness automatically.
+    const { error } = await supabase
+        .from('app_config')
+        .upsert({ key, value }, { onConflict: 'key' });
+
+    if (error) {
+        console.error('[Supabase] Config update failed:', error);
+        throw error;
+    }
+}
+
+export async function getContestParticipants() {
+    const { data, error } = await supabase
+        .from('scores')
+        .select('pseudo, email, contest_best, optin')
+        .gt('contest_best', 0)
+        .order('contest_best', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+}
+
+export async function resetContestScores() {
+    const { error } = await supabase.rpc('reset_contest_scores');
+    if (error) throw error;
 }

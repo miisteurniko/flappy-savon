@@ -36,8 +36,20 @@
                 if (config.contest_end) CONFIG.contest.endDate = config.contest_end;
                 if (config.contest_goal) CONFIG.contest.top3Goal = parseInt(config.contest_goal);
 
+                // Load prizes
+                CONFIG.contest.prizes = [
+                    config.contest_prize_1,
+                    config.contest_prize_2,
+                    config.contest_prize_3
+                ].filter(Boolean);
+
                 console.log('[Main] Config updated from admin:', CONFIG.contest);
-                // Refresh anything that depends on config if needed
+
+                // Refresh UI with new dates and prizes
+                UI.refreshTimer();
+
+                // Dispatch event so leaderboard can re-render if open
+                window.dispatchEvent(new CustomEvent('flappy-config-loaded'));
             }
         });
     }
@@ -150,7 +162,7 @@
             const rows = await API.loadLeaderboard('contest');
             if (rows) {
                 const email = localStorage.getItem('email');
-                UI.renderLeaderboard(rows, email);
+                UI.renderLeaderboard(rows, email, 'contest');
             } else {
                 UI.setLeaderboardError();
             }
@@ -173,8 +185,8 @@
             UI.switchToTab('ranking');
             // Ensure leaderboard loads if it hasn't already or refresh it
             UI.setLeaderboardLoading();
-            API.loadLeaderboard().then(rows => {
-                if (rows) UI.renderLeaderboard(rows, localStorage.getItem('email'));
+            API.loadLeaderboard('contest').then(rows => {
+                if (rows) UI.renderLeaderboard(rows, localStorage.getItem('email'), 'contest');
             });
         });
     }
