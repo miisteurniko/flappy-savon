@@ -261,26 +261,24 @@ canvas {
 
 .brand-logo {
   text-align: center;
-  font-size: 14px;
-  opacity: 0.4;
   margin-top: auto;
   padding-bottom: 20px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 600;
-  text-decoration: none !important;
-  color: var(--ink) !important;
-  transition: opacity 0.2s;
   display: block;
   -webkit-tap-highlight-color: transparent;
+  opacity: 1;
+  /* Reset opacity for image */
 }
 
-.brand-logo:hover,
-.brand-logo:active,
-.brand-logo:visited {
-  color: var(--ink) !important;
-  opacity: 0.8;
-  text-decoration: none !important;
+.brand-logo img {
+  display: block;
+  margin: 0 auto;
+  max-width: 140px;
+  height: auto;
+  transition: transform 0.2s;
+}
+
+.brand-logo:hover img {
+  transform: scale(1.05);
 }
 
 .drawer-item {
