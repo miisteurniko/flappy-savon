@@ -143,7 +143,10 @@ function DetailModal({ type, dateRange, onClose }: { type: DetailModalType; date
                       <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">
                         {(s.pseudo || 'V')[0].toUpperCase()}
                       </div>
-                      <div className="font-bold text-gray-900">{s.pseudo || 'Visiteur'}</div>
+                      <div>
+                        <div className="font-bold text-gray-900">{s.pseudo || 'Visiteur'}</div>
+                        <div className="text-xs text-gray-500">{s.games_count || 0} partie{s.games_count !== 1 ? 's' : ''}</div>
+                      </div>
                     </div>
                     <div className="text-sm text-gray-700">
                       {new Date(s.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}

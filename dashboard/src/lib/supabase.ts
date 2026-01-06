@@ -192,6 +192,17 @@ export async function getSessionsDetail(range: DateRange) {
     const { data: users } = await supabase.from('scores').select('email, pseudo');
     const userMap = new Map((users || []).map(u => [u.email?.toLowerCase(), u.pseudo]));
 
+    // Get all game_end events to count games per session
+    const { data: games } = await supabase
+        .from('analytics_events')
+        .select('session_id')
+        .eq('event', 'game_end');
+
+    const gamesPerSession = new Map<string, number>();
+    (games || []).forEach(g => {
+        gamesPerSession.set(g.session_id, (gamesPerSession.get(g.session_id) || 0) + 1);
+    });
+
     let query = supabase
         .from('analytics_events')
         .select('session_id, created_at, data')
@@ -211,6 +222,7 @@ export async function getSessionsDetail(range: DateRange) {
             session_id: e.session_id,
             created_at: e.created_at,
             pseudo: pseudo || 'Visiteur',
+            games_count: gamesPerSession.get(e.session_id) || 0,
             data: d
         };
     });
