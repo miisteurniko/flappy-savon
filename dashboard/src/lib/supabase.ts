@@ -207,7 +207,8 @@ export async function getSessionsDetail(range: DateRange) {
 
     const gamesPerSession = new Map<string, number>();
     (games || []).forEach(g => {
-        if (g.session_id) {
+        // Only count if session_id is valid (not null, not empty, has reasonable length)
+        if (g.session_id && g.session_id.length > 5) {
             gamesPerSession.set(g.session_id, (gamesPerSession.get(g.session_id) || 0) + 1);
         }
     });
