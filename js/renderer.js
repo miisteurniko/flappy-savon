@@ -274,8 +274,12 @@ const Renderer = {
     },
 
     _drawDecor(cx, W, H, theme) {
-        // 1. Hills (Furthest)
-        cx.fillStyle = this._mixColor(theme.bg1, '#000000', 0.05); // 5% darker than bg
+        // 1. Hills (Furthest) - Use cached color
+        if (this._cachedHillBg !== theme.bg1) {
+            this._cachedHillBg = theme.bg1;
+            this._cachedHillStyle = this._mixColor(theme.bg1, '#000000', 0.05);
+        }
+        cx.fillStyle = this._cachedHillStyle;
         cx.beginPath();
         cx.moveTo(0, H); // Start bottom-left
 
@@ -321,13 +325,16 @@ const Renderer = {
         // 3. Critters
         for (const c of this._critters) {
             if (c.type === 'firefly') {
+                // Outer glow (cheaper than shadowBlur)
+                cx.fillStyle = 'rgba(255, 255, 170, 0.3)';
+                cx.beginPath();
+                cx.arc(c.x, c.y, 6, 0, Math.PI * 2);
+                cx.fill();
+                // Core
                 cx.fillStyle = '#ffffaa';
-                cx.shadowColor = '#ffffaa';
-                cx.shadowBlur = 6;
                 cx.beginPath();
                 cx.arc(c.x, c.y, 2, 0, Math.PI * 2);
                 cx.fill();
-                cx.shadowBlur = 0;
             } else if (c.type === 'bird') {
                 cx.fillStyle = 'rgba(0,0,0,0.2)'; // Dark silhouette
                 cx.beginPath();
