@@ -216,6 +216,7 @@ export async function getSessionsDetail(range: DateRange) {
         .from('analytics_events')
         .select('session_id, created_at, data')
         .eq('event', 'session_start')
+        .not('session_id', 'is', null)
         .order('created_at', { ascending: false });
 
     if (range !== 'all') {
