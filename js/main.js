@@ -23,9 +23,24 @@
     Analytics.init();
 
     // Update UI with stored values
+    // Update UI with stored values
     UI.updateBest(best);
     UI.updatePoints(totalPoints);
     UI.updateMuteButton(Audio.isMuted());
+
+    // Load remote config (Admin settings)
+    if (typeof Supabase !== 'undefined') {
+        Supabase.fetchConfig().then(config => {
+            if (config) {
+                if (config.contest_start) CONFIG.contest.startDate = config.contest_start;
+                if (config.contest_end) CONFIG.contest.endDate = config.contest_end;
+                if (config.contest_goal) CONFIG.contest.top3Goal = parseInt(config.contest_goal);
+
+                console.log('[Main] Config updated from admin:', CONFIG.contest);
+                // Refresh anything that depends on config if needed
+            }
+        });
+    }
 
     // Listen for identity updates (sync from Supabase)
     window.addEventListener('flappy-identity-updated', (e) => {
@@ -132,7 +147,7 @@
         const shown = UI.toggleLeaderboard();
         if (shown) {
             UI.setLeaderboardLoading();
-            const rows = await API.loadLeaderboard();
+            const rows = await API.loadLeaderboard('contest');
             if (rows) {
                 const email = localStorage.getItem('email');
                 UI.renderLeaderboard(rows, email);

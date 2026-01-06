@@ -36,6 +36,7 @@ const UI = {
             connectedName: document.getElementById('connectedName'),
             connectedEmail: document.getElementById('connectedEmail'),
             idEditBtn: document.getElementById('idEditBtn'),
+            guestOptions: document.getElementById('guestOptions'), // Cache guest options
             skinModal: document.getElementById('skinModal'),
             skinsEl: document.getElementById('skins'),
             // Unlock Modal
@@ -51,17 +52,17 @@ const UI = {
 
         // Initialize tabs
         this.initTabs();
+        this.initLeaderboardTabs();
 
         // Connected logic
         if (this.el.idEditBtn) {
             this.el.idEditBtn.addEventListener('click', () => {
                 this.el.connectedView.style.display = 'none';
                 this.el.formInputs.style.display = 'block';
+                if (this.el.guestOptions) this.el.guestOptions.style.display = 'block'; // Show guest link when editing
             });
         }
     },
-
-    // ... (existing code) ...
 
     // === UNLOCK MODAL ===
 
@@ -286,8 +287,6 @@ const UI = {
         this.el.emailInput.value = localStorage.getItem('email') || '';
         this.el.optinInput.checked = localStorage.getItem('optin_email') === '1';
 
-        this.el.optinInput.checked = localStorage.getItem('optin_email') === '1';
-
         // Toggle View based on existing data
         const pseudo = this.el.pseudoInput.value;
         const email = this.el.emailInput.value;
@@ -296,6 +295,7 @@ const UI = {
             // SHOW CONNECTED VIEW
             this.el.formInputs.style.display = 'none';
             this.el.connectedView.style.display = 'block';
+            if (this.el.guestOptions) this.el.guestOptions.style.display = 'none'; // Hide guest link
 
             // Fill info
             if (this.el.connectedName) this.el.connectedName.textContent = pseudo;
@@ -305,6 +305,7 @@ const UI = {
             // SHOW FORM
             this.el.formInputs.style.display = 'block';
             if (this.el.connectedView) this.el.connectedView.style.display = 'none';
+            if (this.el.guestOptions) this.el.guestOptions.style.display = 'block'; // Show guest link
         }
 
         // Switch to default tab
@@ -522,6 +523,35 @@ const UI = {
     setLeaderboardError() {
         const container = document.getElementById('modalLeaderboard');
         if (container) container.innerHTML = '<div class="muted">Impossible de charger le classement.</div>';
+    },
+
+    // === DYNAMIC LEADERBOARD TABS ===
+    initLeaderboardTabs() {
+        const tabs = document.querySelectorAll('.lb-tab');
+        tabs.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                // Toggle active state
+                tabs.forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update title
+                const type = btn.dataset.type;
+                const title = document.getElementById('lbTitle');
+                if (title) {
+                    title.textContent = type === 'contest' ?
+                        'Top Joueurs (Concours)' :
+                        'Top Joueurs (Général)';
+                }
+
+                // Show loading
+                this.setLeaderboardLoading();
+
+                // Fetch data
+                const rows = await API.loadLeaderboard(type);
+                const email = localStorage.getItem('email');
+                this.renderLeaderboard(rows, email);
+            });
+        });
     },
 
     // === STATS MODAL ===

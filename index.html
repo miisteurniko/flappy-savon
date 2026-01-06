@@ -173,9 +173,7 @@
                 "La vie est une bulle : éphémère, mais brillante."
             </p>
 
-            <a href="https://savon-yvard.fr/" target="_blank" class="brand-logo">
-                <img src="assets/logo.png" alt="Savon Yvard" width="140" height="auto">
-            </a>
+            <a href="https://savon-yvard.fr/" target="_blank" class="brand-logo">SAVON YVARD</a>
             <span class="version-tag">Beta V0.1</span>
         </div>
     </div>
@@ -270,9 +268,10 @@
             <div id="tab-register" class="tab-content active">
                 <!-- VIEW: Connected -->
                 <div id="connectedView" style="display:none; text-align:center; padding: 20px 0;">
-                    <div style="font-size:16px; margin-bottom:8px; color: #42b883;">✅ Compte connecté</div>
-                    <div id="connectedName"
-                        style="font-weight:700; font-size:20px; margin-bottom:4px; color: var(--ink);"></div>
+                    <div class="status-pill large">
+                        <span class="icon">✅</span>
+                        <span id="connectedName"></span>
+                    </div>
                     <div id="connectedEmail" style="font-size:14px; opacity:0.7; margin-bottom:24px;"></div>
 
                     <button id="idEditBtn" class="btn secondary"
@@ -298,13 +297,21 @@
                     <button id="idSaveBtn" class="btn full">Participer</button>
                 </div>
 
-                <div style="text-align: center; margin-top: 10px;">
+                <div id="guestOptions" style="text-align: center; margin-top: 10px;">
                     <button id="idGuestBtn" class="skip-link">Jouer sans participer →</button>
                 </div>
+                <p class="legal" style="margin-top: 15px;"><a
+                        href="https://savon-yvard.fr/politique-de-confidentialite/" target="_blank">Politique de
+                        confidentialité</a></p>
             </div>
 
             <div id="tab-ranking" class="tab-content" style="text-align: center;">
-                <h3 style="margin: 10px 0 5px; font-size: 16px; color: #2c2420;">🏆 Classement Général</h3>
+                <div class="lb-tabs">
+                    <button class="lb-tab active" data-type="contest">🏆 Concours</button>
+                    <button class="lb-tab" data-type="general">🌍 Général</button>
+                </div>
+                <h3 id="lbTitle" style="margin: 10px 0 5px; font-size: 16px; color: #2c2420;">🏆 Top Joueurs (Concours)
+                </h3>
                 <p class="muted" style="margin-bottom: 20px; font-size: 13px;">
                     Les 3 premiers gagnent des cadeaux ! 🎁
                 </p>
@@ -359,8 +366,7 @@
                 </div>
             </div>
 
-            <p class="legal"><a href="https://savon-yvard.fr/politique-de-confidentialite/" target="_blank">Politique de
-                    confidentialité</a></p>
+
         </div>
     </div>
 

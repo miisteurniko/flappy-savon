@@ -38,9 +38,14 @@ const API = {
     },
 
     // Load leaderboard from Supabase
-    async loadLeaderboard() {
+    async loadLeaderboard(type = 'general') {
         try {
-            const data = await Supabase.getLeaderboard(10);
+            let minDate = null;
+            if (type === 'contest') {
+                minDate = CONFIG.contest.startDate;
+            }
+
+            const data = await Supabase.getLeaderboard(10, minDate);
             this._lastLeaderboard = data;
             return data;
         } catch (e) {

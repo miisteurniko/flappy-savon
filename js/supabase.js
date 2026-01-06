@@ -103,12 +103,15 @@ const Supabase = {
     },
 
     // Get leaderboard (top 10 by best score)
-    async getLeaderboard(limit = 10) {
+    async getLeaderboard(limit = 10, minDate = null) {
         try {
-            const response = await fetch(
-                `${this._url}/rest/v1/scores?select=pseudo,email,best&order=best.desc&limit=${limit}`,
-                { headers: this._headers() }
-            );
+            let url = `${this._url}/rest/v1/scores?select=pseudo,email,best&order=best.desc&limit=${limit}`;
+            if (minDate) {
+                // Filter for new players (created after minDate)
+                url += `&created_at=gt.${minDate}`;
+            }
+
+            const response = await fetch(url, { headers: this._headers() });
             const data = await response.json();
             return data || [];
         } catch (e) {
@@ -130,6 +133,31 @@ const Supabase = {
             const data = await response.json();
             return (data?.length || 0) + 1;
         } catch (e) {
+            return null;
+        }
+    },
+
+    // Fetch remote config (Contest dates etc)
+    async fetchConfig() {
+        try {
+            // Expects a table 'app_config' with columns: key (text), value (text)
+            const response = await fetch(
+                `${this._url}/rest/v1/app_config?select=key,value`,
+                { headers: this._headers() }
+            );
+
+            if (!response.ok) return null;
+
+            const rows = await response.json();
+            if (!rows || !Array.isArray(rows)) return null;
+
+            // Convert array to object
+            return rows.reduce((acc, row) => {
+                acc[row.key] = row.value;
+                return acc;
+            }, {});
+        } catch (e) {
+            console.warn('[Supabase] No remote config found, using defaults.');
             return null;
         }
     }
