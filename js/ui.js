@@ -30,6 +30,12 @@ const UI = {
             pseudoInput: document.getElementById('pseudo'),
             emailInput: document.getElementById('email'),
             optinInput: document.getElementById('optin'),
+            // Connected View Elements
+            formInputs: document.getElementById('formInputs'),
+            connectedView: document.getElementById('connectedView'),
+            connectedName: document.getElementById('connectedName'),
+            connectedEmail: document.getElementById('connectedEmail'),
+            idEditBtn: document.getElementById('idEditBtn'),
             skinModal: document.getElementById('skinModal'),
             skinsEl: document.getElementById('skins'),
             // Unlock Modal
@@ -45,6 +51,14 @@ const UI = {
 
         // Initialize tabs
         this.initTabs();
+
+        // Connected logic
+        if (this.el.idEditBtn) {
+            this.el.idEditBtn.addEventListener('click', () => {
+                this.el.connectedView.style.display = 'none';
+                this.el.formInputs.style.display = 'block';
+            });
+        }
     },
 
     // ... (existing code) ...
@@ -271,6 +285,27 @@ const UI = {
         this.el.pseudoInput.value = localStorage.getItem('pseudo') || '';
         this.el.emailInput.value = localStorage.getItem('email') || '';
         this.el.optinInput.checked = localStorage.getItem('optin_email') === '1';
+
+        this.el.optinInput.checked = localStorage.getItem('optin_email') === '1';
+
+        // Toggle View based on existing data
+        const pseudo = this.el.pseudoInput.value;
+        const email = this.el.emailInput.value;
+
+        if (pseudo && email && this.el.connectedView) {
+            // SHOW CONNECTED VIEW
+            this.el.formInputs.style.display = 'none';
+            this.el.connectedView.style.display = 'block';
+
+            // Fill info
+            if (this.el.connectedName) this.el.connectedName.textContent = pseudo;
+            if (this.el.connectedEmail) this.el.connectedEmail.textContent = email;
+
+        } else if (this.el.formInputs) {
+            // SHOW FORM
+            this.el.formInputs.style.display = 'block';
+            if (this.el.connectedView) this.el.connectedView.style.display = 'none';
+        }
 
         // Switch to default tab
         const tabs = this.el.idModal.querySelectorAll('.tab-btn');
