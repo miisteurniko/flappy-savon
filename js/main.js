@@ -125,11 +125,13 @@
     const openMenu = () => {
         menuDrawer.classList.add('open');
         menuOverlay.classList.add('open');
+        Game.setPaused(true);
     };
 
     const closeMenu = () => {
         menuDrawer.classList.remove('open');
         menuOverlay.classList.remove('open');
+        Game.setPaused(false);
     };
 
     document.getElementById('menuBtn').addEventListener('click', openMenu);
@@ -513,9 +515,25 @@
     });
 
     // Start game loop
-    requestAnimationFrame(loop);
+    // ===== Splash Screen & Game Loop Start =====
+    const startLoop = () => {
+        draw();
+        requestAnimationFrame(loop);
+    };
 
-    // ===== Dev Tests =====
+    window.addEventListener('load', () => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+            setTimeout(() => {
+                startLoop();
+                splash.classList.add('fade-out');
+                setTimeout(() => { splash.style.display = 'none'; }, 500);
+            }, 2500);
+        } else {
+            startLoop();
+        }
+    });
+
     if (/test=1/.test(location.search)) {
         const assert = (name, cond) => console.log((cond ? '✅ ' : '❌ ') + name);
         assert('AABB overlap', Game._intersectAABB(0, 0, 10, 10, 5, 5, 15, 15) === true);

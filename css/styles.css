@@ -1402,3 +1402,61 @@ canvas {
 .prize-name {
   font-weight: 600;
 }
+
+/* ===== Splash Screen ===== */
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #b0e8ff url('../assets/splash.png') no-repeat center center;
+  background-size: cover;
+  /* Cover the whole screen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  /* Loader at the bottom */
+  padding-bottom: 80px;
+  /* Space for loader */
+  transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+.splash-screen.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Image tag removed from HTML logic, handled by background */
+.splash-screen img {
+  display: none;
+}
+
+.splash-loader {
+  font-family: 'Spinnaker', sans-serif;
+  font-size: 16px;
+  color: #fff;
+  /* White text on busy background */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: pulse 1.5s infinite;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}

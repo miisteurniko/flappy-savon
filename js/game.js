@@ -106,6 +106,12 @@ const Game = {
         return this.state.paused;
     },
 
+    // Set pause explicitly
+    setPaused(val) {
+        if (!this.state.alive || this.state.gameOver) return;
+        this.state.paused = val;
+    },
+
     // Update game logic
     update(dt) {
         // Theme transition logic moved to score update for performance
