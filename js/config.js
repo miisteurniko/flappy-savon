@@ -88,7 +88,7 @@ const CONFIG = {
     { id: 'safran', name: 'Safran', c1: '#ffccbc', c2: '#ff7043', unlockAt: 0, decor: { type: 'safran', count: 8, speed: 0.7 } },           // More Reddish/Orange
 
     // Unlockable Progression
-    { id: 'cedre', name: 'Cèdre du Liban', c1: '#c7b299', c2: '#8e6e53', unlockAt: 5 },   // 5 pts
+    { id: 'cedre', name: 'Cèdre du Liban', c1: '#c7b299', c2: '#8e6e53', unlockAt: 5, decor: { type: 'cedar', count: 8, speed: 0.6 } },   // 5 pts
     { id: 'figue', name: 'Figue Santal', c1: '#e8dcb5', c2: '#d4c085', unlockAt: 10 },    // 10 pts
     { id: 'lait', name: "Lait d'ânesse", c1: '#f9fbff', c2: '#e2e8f0', unlockAt: 15 },    // 15 pts
     { id: 'ortie', name: "Poudre d'Ortie", c1: '#cfe8c8', c2: '#84c17a', unlockAt: 20 },  // 20 pts

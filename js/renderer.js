@@ -788,10 +788,34 @@ const Renderer = {
                 cx.stroke();
 
                 // Yellow Center
-                cx.fillStyle = '#ffeb3b';
                 cx.beginPath();
                 cx.arc(0, 0, 2, 0, Math.PI * 2);
                 cx.fill();
+            } else if (item.type === 'cedar') {
+                // Cedar Wood Stick
+                // Cylinder shape
+                cx.fillStyle = '#8d6e63'; // Wood brown
+
+                cx.beginPath();
+                // Simple rounded rectangle path manually
+                cx.moveTo(-3, -10);
+                cx.lineTo(3, -10);
+                cx.quadraticCurveTo(4, -10, 4, -9);
+                cx.lineTo(4, 9);
+                cx.quadraticCurveTo(4, 10, 3, 10);
+                cx.lineTo(-3, 10);
+                cx.quadraticCurveTo(-4, 10, -4, 9);
+                cx.lineTo(-4, -9);
+                cx.quadraticCurveTo(-4, -10, -3, -10);
+                cx.fill();
+
+                // Wood grain
+                cx.strokeStyle = '#5d4037';
+                cx.lineWidth = 1;
+                cx.beginPath();
+                cx.moveTo(-1, -7); cx.lineTo(-1, 7);
+                cx.moveTo(1, -5); cx.lineTo(1, 5);
+                cx.stroke();
             }
 
             cx.restore();
