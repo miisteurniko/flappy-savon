@@ -94,6 +94,7 @@
         // Track game start on first flap
         if (!Game.isAlive() && !Game.isGameOver()) {
             Analytics.trackGameStart();
+            // Game.flap() will handle setting startTime now
         }
 
         Game.flap();

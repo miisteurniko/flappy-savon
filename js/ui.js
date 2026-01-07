@@ -610,6 +610,21 @@ const UI = {
         const badgeScores = Object.keys(unlockedBadges);
         document.getElementById('statBadges').textContent = badgeScores.length;
 
+        // Time Played
+        const totalSeconds = Number(localStorage.getItem('flappySavonTime') || 0);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        // Format: "12h 34m" or "45m"
+        let timeStr = '';
+        if (hours > 0) timeStr += `${hours}h `;
+        timeStr += `${minutes}m`;
+        if (hours === 0 && minutes === 0 && totalSeconds > 0) timeStr = '< 1m';
+        if (totalSeconds === 0) timeStr = '0m';
+
+        const statTimeEl = document.getElementById('statTime');
+        if (statTimeEl) statTimeEl.textContent = timeStr;
+        else console.warn('Missing #statTime element');
+
         // Show badge names from CONFIG
         const badgesList = document.getElementById('statsBadgesList');
         if (badgesList) {

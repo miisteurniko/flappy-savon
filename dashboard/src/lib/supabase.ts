@@ -19,7 +19,7 @@ export interface DashboardStats {
     totalRegistrations: number;
     conversionRate: number;
     avgGameDuration: number;
-    sessionsPerDay: { date: string; count: number }[];
+    gamesPerDay: { date: string; count: number }[];
     scoreDistribution: { range: string; count: number }[];
     recentRegistrations: { id: number; pseudo: string; email: string; created_at: string; optin: boolean }[];
 }
@@ -47,15 +47,21 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
             daysCount = 1;
             break;
         case '7d':
-            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            startDate = new Date(now);
+            startDate.setDate(now.getDate() - 7);
+            startDate.setHours(0, 0, 0, 0);
             daysCount = 7;
             break;
         case '14d':
-            startDate = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+            startDate = new Date(now);
+            startDate.setDate(now.getDate() - 14);
+            startDate.setHours(0, 0, 0, 0);
             daysCount = 14;
             break;
         case '30d':
-            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            startDate = new Date(now);
+            startDate.setDate(now.getDate() - 30);
+            startDate.setHours(0, 0, 0, 0);
             daysCount = 30;
             break;
         case 'all':
@@ -64,40 +70,60 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
             break;
     }
 
-    // Get all events from date range
-    let query = supabase
-        .from('analytics_events')
-        .select('*')
-        .order('created_at', { ascending: false });
+    const startDateIso = startDate.toISOString();
 
-    if (range !== 'all') {
-        query = query.gte('created_at', startDate.toISOString());
-    }
+    // 1. Fetch exact counts for Tiles (parallel)
+    const countQuery = (event: string) => {
+        let q = supabase
+            .from('analytics_events')
+            .select('*', { count: 'exact', head: true }) // head:true means no data, just count
+            .eq('event', event);
+        if (range !== 'all') q = q.gte('created_at', startDateIso);
+        return q;
+    };
 
-    const { data: events } = await query;
+    const [
+        { count: sessionCount },
+        { count: gameCount },
+        { count: regCount },
+        { data: events } // Fetch latest events for charts
+    ] = await Promise.all([
+        countQuery('session_start'),
+        countQuery('game_end'),
+        countQuery('registration_complete'),
+        (async () => {
+            let q = supabase
+                .from('analytics_events')
+                .select('*')
+                .in('event', ['session_start', 'game_end', 'registration_complete'])
+                .order('created_at', { ascending: false })
+                .limit(10000);
+            if (range !== 'all') q = q.gte('created_at', startDateIso);
+            return q;
+        })()
+    ]);
+
     const allEvents = events || [];
-
-    // Calculate stats
-    const sessionStarts = allEvents.filter(e => e.event === 'session_start');
     const gameEnds = allEvents.filter(e => e.event === 'game_end');
-    const registrations = allEvents.filter(e => e.event === 'registration_complete');
 
-    // Sessions per day
-    const sessionsPerDay: Record<string, number> = {};
-    sessionStarts.forEach(e => {
+    // Games per day (Chart - based on sample)
+    const gamesPerDay: Record<string, number> = {};
+    gameEnds.forEach(e => {
         const date = new Date(e.created_at).toISOString().split('T')[0];
-        sessionsPerDay[date] = (sessionsPerDay[date] || 0) + 1;
+        gamesPerDay[date] = (gamesPerDay[date] || 0) + 1;
     });
 
-    // Fill in missing days (limit to last N days for chart readability)
+    // Fill in missing days
     const chartDays = Math.min(daysCount, 30);
-    const sessionsArray: { date: string; count: number }[] = [];
+    const gamesArray: { date: string; count: number }[] = [];
     for (let i = chartDays - 1; i >= 0; i--) {
-        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        sessionsArray.push({ date, count: sessionsPerDay[date] || 0 });
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        const date = d.toISOString().split('T')[0];
+        gamesArray.push({ date, count: gamesPerDay[date] || 0 });
     }
 
-    // Score distribution
+    // Score distribution (based on sample)
     const scores = gameEnds.map(e => {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
         return data?.score || 0;
@@ -116,7 +142,7 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
         count: scores.filter(s => s >= min && s <= max).length,
     }));
 
-    // Avg game duration
+    // Avg game duration (based on sample)
     const durations = gameEnds.map(e => {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
         return data?.duration_ms || 0;
@@ -126,21 +152,22 @@ export async function getDashboardStats(range: DateRange = '7d'): Promise<Dashbo
         ? durations.reduce((a, b) => a + b, 0) / durations.length / 1000
         : 0;
 
-    // All registrations from scores table (no limit for export)
+    // All registrations from scores table (limit 5000 for recent list)
     const { data: recentUsers } = await supabase
         .from('scores')
         .select('id, pseudo, email, created_at, optin')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
     return {
-        totalSessions: sessionStarts.length,
-        totalGames: gameEnds.length,
-        totalRegistrations: registrations.length,
-        conversionRate: sessionStarts.length > 0
-            ? (registrations.length / sessionStarts.length) * 100
+        totalSessions: sessionCount || 0,
+        totalGames: gameCount || 0,
+        totalRegistrations: regCount || 0,
+        conversionRate: (sessionCount || 0) > 0
+            ? ((regCount || 0) / (sessionCount || 0)) * 100
             : 0,
         avgGameDuration: Math.round(avgDuration * 10) / 10,
-        sessionsPerDay: sessionsArray,
+        gamesPerDay: gamesArray,
         scoreDistribution,
         recentRegistrations: (recentUsers || []).map(u => ({ ...u, optin: !!u.optin })),
     };
@@ -217,7 +244,8 @@ export async function getSessionsDetail(range: DateRange) {
         .select('session_id, created_at, data')
         .eq('event', 'session_start')
         .not('session_id', 'is', null)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
     if (range !== 'all') {
         query = query.gte('created_at', startDate.toISOString());
@@ -249,7 +277,8 @@ export async function getGamesDetail(range: DateRange) {
         .from('analytics_events')
         .select('session_id, created_at, data')
         .eq('event', 'game_end')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
     if (range !== 'all') {
         query = query.gte('created_at', startDate.toISOString());
@@ -276,7 +305,8 @@ export async function getRegistrationsDetail(range: DateRange) {
     let query = supabase
         .from('scores')
         .select('id, pseudo, email, created_at, optin, best')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
     if (range !== 'all') {
         query = query.gte('created_at', startDate.toISOString());
@@ -288,15 +318,21 @@ export async function getRegistrationsDetail(range: DateRange) {
 
 function getStartDate(range: DateRange): Date {
     const now = new Date();
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+
     switch (range) {
         case 'today':
-            return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            return d;
         case '7d':
-            return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            d.setDate(now.getDate() - 7);
+            return d;
         case '14d':
-            return new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+            d.setDate(now.getDate() - 14);
+            return d;
         case '30d':
-            return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            d.setDate(now.getDate() - 30);
+            return d;
         case 'all':
         default:
             return new Date('2024-01-01');

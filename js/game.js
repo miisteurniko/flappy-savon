@@ -10,7 +10,10 @@ const Game = {
         paused: false,
         score: 0,
         pipes: [],
-        t: 0
+        t: 0,
+        // Stats
+        startTime: 0,
+        totalTime: Number(localStorage.getItem('flappySavonTime') || 0)
     },
 
     // Soap (player) state
@@ -50,7 +53,10 @@ const Game = {
         this.soap.y = CONFIG.canvas.height * 0.5;
         this.soap.vx = 0;
         this.soap.vy = 0;
+        this.soap.vy = 0;
         this.soap.rot = 0;
+
+        this.state.startTime = 0;
 
         // Initialize pipes
         for (let i = 0; i < 4; i++) {
@@ -79,7 +85,10 @@ const Game = {
         }
 
         // Core physics only - immediate
-        this.state.alive = true;
+        if (!this.state.alive) {
+            this.state.alive = true;
+            this.state.startTime = Date.now();
+        }
         this.soap.vy = CONFIG.physics.flapForce;
 
         // Visual feedback immediate
@@ -195,6 +204,19 @@ const Game = {
         this.state.alive = false;
         Audio.hit();
 
+        // Stats Update (Time Played)
+        if (this.state.startTime > 0) {
+            const el = (Date.now() - this.state.startTime) / 1000;
+            // Only count if played > 1 second (avoid accidental taps)
+            if (el > 1) {
+                this.state.totalTime += el;
+                localStorage.setItem('flappySavonTime', this.state.totalTime);
+
+                // Track 'games played' here to ensure only valid games count
+                // (Note: We might want to remove the increment in main.js if it exists there)
+            }
+        }
+
         // Haptic feedback
         if (navigator.vibrate) {
             navigator.vibrate(200);
@@ -268,6 +290,7 @@ const Game = {
 
     // Getters
     getScore() { return this.state.score; },
+    getTotalTime() { return this.state.totalTime; },
     isAlive() { return this.state.alive; },
     isGameOver() { return this.state.gameOver; },
     isPaused() { return this.state.paused; },

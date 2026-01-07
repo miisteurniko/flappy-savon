@@ -688,6 +688,14 @@ const Renderer = {
             // Handle Mixed Types
             if (type === 'citron_mix') {
                 item.type = Math.random() < 0.6 ? 'lemon' : 'ginger';
+            } else if (type === 'figue_mix') {
+                item.type = Math.random() < 0.5 ? 'figue' : 'santal';
+            } else if (type === 'lait_mix') {
+                item.type = Math.random() < 0.5 ? 'milk_drop' : 'milk_bubble';
+            } else if (type === 'ortie_mix') {
+                item.type = Math.random() < 0.4 ? 'nettle_leaf' : 'green_powder';
+            } else if (type === 'miel_mix') {
+                item.type = Math.random() < 0.5 ? 'honey_drop' : 'almond';
             } else {
                 item.type = type;
             }
@@ -815,6 +823,138 @@ const Renderer = {
                 cx.beginPath();
                 cx.moveTo(-1, -7); cx.lineTo(-1, 7);
                 cx.moveTo(1, -5); cx.lineTo(1, 5);
+                cx.stroke();
+            } else if (item.type === 'figue') {
+                // Fig (Teardrop shape)
+                cx.fillStyle = '#4a148c'; // Dark Purple
+                cx.beginPath();
+                cx.moveTo(0, -8);
+                cx.bezierCurveTo(5, -5, 6, 2, 0, 8);
+                cx.bezierCurveTo(-6, 2, -5, -5, 0, -8);
+                cx.fill();
+
+                // Green stem/top gradient
+                cx.fillStyle = '#7cb342';
+                cx.beginPath();
+                cx.moveTo(0, -8);
+                cx.lineTo(1, -10);
+                cx.lineTo(-1, -10);
+                cx.fill();
+            } else if (item.type === 'santal') {
+                // Sandalwood Chip (Irregular flat shape)
+                cx.fillStyle = '#ffe0b2'; // Light Beige/Cream
+                cx.beginPath();
+                cx.moveTo(-5, -3);
+                cx.lineTo(4, -5);
+                cx.lineTo(6, 2);
+                cx.lineTo(-2, 4);
+                cx.lineTo(-6, 0);
+                cx.closePath();
+                cx.fill();
+
+                // Grain
+                cx.strokeStyle = '#ffcc80';
+                cx.lineWidth = 0.5;
+                cx.beginPath();
+                cx.moveTo(-4, -2); cx.lineTo(3, -4);
+                cx.moveTo(-1, 3); cx.lineTo(5, 1);
+                cx.stroke();
+            } else if (item.type === 'milk_drop') {
+                // Milk Drop (Teardrop)
+                cx.fillStyle = '#f9fbff'; // Milky White
+                cx.beginPath();
+                cx.moveTo(0, -6);
+                cx.bezierCurveTo(4, -3, 5, 4, 0, 8);
+                cx.bezierCurveTo(-5, 4, -4, -3, 0, -6);
+                cx.fill();
+
+                // Highlight
+                cx.fillStyle = '#ffffff';
+                cx.beginPath();
+                cx.arc(-2, 2, 1.5, 0, Math.PI * 2);
+                cx.fill();
+            } else if (item.type === 'milk_bubble') {
+                // Milk Bubble (Opaque)
+                cx.fillStyle = 'rgba(249, 251, 255, 0.9)';
+                cx.beginPath();
+                cx.arc(0, 0, 5, 0, Math.PI * 2);
+                cx.fill();
+
+                // Shine
+                cx.fillStyle = '#ffffff';
+                cx.beginPath();
+                cx.arc(-1.5, -1.5, 2, 0, Math.PI * 2);
+                cx.fill();
+            } else if (item.type === 'nettle_leaf') {
+                // Nettle Leaf (Serrated oval)
+                cx.fillStyle = '#66bb6a'; // Fresh Green
+
+                cx.beginPath();
+                cx.moveTo(0, -8); // Top tip
+
+                // Right side - serrated
+                cx.lineTo(3, -5); cx.lineTo(2, -4);
+                cx.lineTo(5, -1); cx.lineTo(3, 0);
+                cx.lineTo(5, 3); cx.lineTo(3, 4);
+                cx.lineTo(4, 7); cx.lineTo(0, 8); // Bottom
+
+                // Left side - serrated
+                cx.lineTo(-4, 7); cx.lineTo(-3, 4);
+                cx.lineTo(-5, 3); cx.lineTo(-3, 0);
+                cx.lineTo(-5, -1); cx.lineTo(-2, -4);
+                cx.lineTo(-3, -5);
+                cx.closePath();
+                cx.fill();
+
+                // Central vein
+                cx.strokeStyle = '#388e3c';
+                cx.lineWidth = 0.5;
+                cx.beginPath();
+                cx.moveTo(0, -6); cx.lineTo(0, 6);
+                cx.stroke();
+
+            } else if (item.type === 'green_powder') {
+                // Green Powder (Clusters or single specks)
+                cx.fillStyle = '#a5d6a7';
+
+                // Main Speck
+                cx.beginPath();
+                cx.arc(0, 0, 1.5, 0, Math.PI * 2);
+                cx.fill();
+
+                // Satellite specks (dust effect)
+                cx.fillStyle = '#81c784';
+                cx.beginPath(); cx.arc(3, -2, 0.8, 0, Math.PI * 2); cx.fill();
+                cx.beginPath(); cx.arc(-2, 3, 0.8, 0, Math.PI * 2); cx.fill();
+            } else if (item.type === 'honey_drop') {
+                // Honey Drop (Amber Teardrop)
+                cx.fillStyle = '#ffb300'; // Amber/Gold
+                cx.beginPath();
+                cx.moveTo(0, -6);
+                cx.bezierCurveTo(4, -3, 5, 4, 0, 8);
+                cx.bezierCurveTo(-5, 4, -4, -3, 0, -6);
+                cx.fill();
+
+                // Shiny highlight
+                cx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                cx.beginPath();
+                cx.ellipse(-2, 2, 1.5, 3, Math.PI / 4, 0, Math.PI * 2);
+                cx.fill();
+            } else if (item.type === 'almond') {
+                // Almond (Brown Oval)
+                cx.fillStyle = '#8d6e63'; // Brown
+                cx.beginPath();
+                // Almond shape: Pointy top, rounded bottom
+                cx.moveTo(0, -7);
+                cx.bezierCurveTo(4, -4, 5, 5, 0, 7);
+                cx.bezierCurveTo(-5, 5, -4, -4, 0, -7);
+                cx.fill();
+
+                // Texture lines
+                cx.strokeStyle = '#6d4c41';
+                cx.lineWidth = 0.5;
+                cx.beginPath();
+                cx.moveTo(0, -6); cx.lineTo(0, 6);
                 cx.stroke();
             }
 

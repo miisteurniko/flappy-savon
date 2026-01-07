@@ -322,8 +322,8 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
         {loading ? (
           <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div></div>
         ) : (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-6 overflow-y-auto max-h-[70vh] pr-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Date de début</label>
                 <div className="relative">
@@ -331,7 +331,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                     type="date"
                     value={startDate}
                     onChange={e => setStartDate(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700"
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700 min-w-0"
                   />
                   <svg className="absolute left-3 top-3.5 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                 </div>
@@ -343,7 +343,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                     type="date"
                     value={endDate}
                     onChange={e => setEndDate(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700"
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700 min-w-0"
                   />
                   <svg className="absolute left-3 top-3.5 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                 </div>
@@ -355,33 +355,33 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
               <h3 className="text-sm font-bold text-gray-900">Lots à gagner</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">🥇</span>
+                  <span className="text-xl shrink-0">🥇</span>
                   <input
                     type="text"
                     placeholder="Ex: 1 an de savon"
                     value={prize1}
                     onChange={e => setPrize1(e.target.value)}
-                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm"
+                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm min-w-0"
                   />
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">🥈</span>
+                  <span className="text-xl shrink-0">🥈</span>
                   <input
                     type="text"
                     placeholder="Ex: Coffret découverte"
                     value={prize2}
                     onChange={e => setPrize2(e.target.value)}
-                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm"
+                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm min-w-0"
                   />
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">🥉</span>
+                  <span className="text-xl shrink-0">🥉</span>
                   <input
                     type="text"
                     placeholder="Ex: Bon d'achat"
                     value={prize3}
                     onChange={e => setPrize3(e.target.value)}
-                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm"
+                    className="flex-1 px-4 py-2 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none text-sm min-w-0"
                   />
                 </div>
               </div>
@@ -395,7 +395,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                   value={webhookUrl}
                   onChange={e => setWebhookUrl(e.target.value)}
                   placeholder="https://n8n..."
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700 text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none transition font-medium text-gray-700 text-sm min-w-0"
                 />
                 <svg className="absolute left-3 top-3.5 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
               </div>
@@ -404,7 +404,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
             {/* Duration Preview */}
             {startDate && endDate && !isNaN(new Date(startDate).getTime()) && !isNaN(new Date(endDate).getTime()) && (
               <div className="bg-amber-50 rounded-xl p-4 flex items-center gap-3 text-amber-800 text-sm">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
                 <span>Durée du concours : <strong>{Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} jours</strong></span>
               </div>
             )}
@@ -414,7 +414,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                 <h3 className="text-sm font-bold text-gray-900 mb-2">Actions Concours</h3>
                 <p className="text-xs text-gray-500 mb-4">Gérez la fin de période : exportez les gagnants puis réinitialisez pour le prochain.</p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={async () => {
                     try {
@@ -437,7 +437,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                     }
                   }}
                   id="btn-export-contest"
-                  className="flex-1 px-4 py-2 bg-green-50 text-green-700 font-semibold rounded-xl hover:bg-green-100 transition flex items-center justify-center gap-2 text-sm border border-green-200 cursor-pointer"
+                  className="flex-1 px-4 py-3 bg-green-50 text-green-700 font-semibold rounded-xl hover:bg-green-100 transition flex items-center justify-center gap-2 text-sm border border-green-200 cursor-pointer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                   Exporter Résultats
@@ -474,7 +474,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                     }
                   }}
                   id="btn-webhook"
-                  className="flex-1 px-4 py-2 bg-blue-50 text-blue-700 font-semibold rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2 text-sm border border-blue-200 cursor-pointer"
+                  className="flex-1 px-4 py-3 bg-blue-50 text-blue-700 font-semibold rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2 text-sm border border-blue-200 cursor-pointer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                   Envoyer via Webhook
@@ -491,7 +491,7 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
                       }
                     }
                   }}
-                  className="flex-1 px-4 py-2 bg-red-50 text-red-700 font-semibold rounded-xl hover:bg-red-100 transition flex items-center justify-center gap-2 text-sm border border-red-200 cursor-pointer"
+                  className="flex-1 px-4 py-3 bg-red-50 text-red-700 font-semibold rounded-xl hover:bg-red-100 transition flex items-center justify-center gap-2 text-sm border border-red-200 cursor-pointer"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                   Réinitialiser
@@ -635,11 +635,11 @@ export default function Dashboard() {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Sessions per day */}
+          {/* Games per day */}
           <div className="lg:col-span-2 bg-white rounded-[32px] p-8 shadow-sm">
-            <h3 className="font-bold text-xl text-[#1A1A1A] mb-8">Évolution des sessions</h3>
+            <h3 className="font-bold text-xl text-[#1A1A1A] mb-8">Évolution des parties jouées</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={stats.sessionsPerDay}>
+              <LineChart data={stats.gamesPerDay}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis
                   dataKey="date"
@@ -658,7 +658,7 @@ export default function Dashboard() {
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   labelFormatter={(val) => new Date(val).toLocaleDateString('fr-FR')}
-                  formatter={(val) => [val, 'Sessions']}
+                  formatter={(val) => [val, 'Parties']}
                 />
                 <Line
                   type="monotone"
