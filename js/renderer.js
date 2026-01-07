@@ -169,6 +169,9 @@ const Renderer = {
 
         // 3. Animate/Spawn Critters
         this._manageCritters(dt);
+
+        // 4. Animate Skin Decor
+        this._animateSkinDecor(smoothDt);
     },
 
     _manageCritters(dt) {
@@ -257,6 +260,9 @@ const Renderer = {
 
         // Decor (Stars/Clouds/Hills/Critters) BEHIND the transition fade logic
         this._drawDecor(cx, W, H, currentTheme);
+
+        // Skin Specific Decor (Flowers etc)
+        this._drawSkinDecor(cx, W, H);
 
         // Transition overlay (if needed)
         if (themeTrans < 1) {
@@ -484,6 +490,9 @@ const Renderer = {
             this._cachedOutlineColor = this._mixColor(this._cachedSkin.c2, '#000000', 0.25);
             // Text: Mix skin.c2 with black (0.5)
             this._cachedTextColor = this._mixColor(this._cachedSkin.c2, '#000000', 0.5);
+
+            // Update decor items for this skin
+            this._updateSkinDecor(skinId);
         }
         const skin = this._cachedSkin;
 
@@ -635,5 +644,176 @@ const Renderer = {
         const b = c2rgb(hex2);
 
         return `rgba(${Math.round(a[0] * (1 - k) + b[0] * k)},${Math.round(a[1] * (1 - k) + b[1] * k)},${Math.round(a[2] * (1 - k) + b[2] * k)},1)`;
+    },
+
+    // ========================================
+    // SKIN DECOR SYSTEM (Optimized)
+    // ========================================
+
+    _updateSkinDecor(skinId) {
+        const skin = CONFIG.skins.find(s => s.id === skinId);
+        if (!skin || !skin.decor) {
+            // Disable all if no decor
+            if (this._skinDecorItems) {
+                this._skinDecorItems.forEach(i => i.active = false);
+            }
+            return;
+        }
+
+        // Initialize pool if needed
+        if (!this._skinDecorItems) {
+            this._skinDecorItems = [];
+            // Create fixed pool of 12 items (max expected)
+            for (let i = 0; i < 12; i++) {
+                this._skinDecorItems.push({
+                    x: 0, y: 0, rot: 0, speed: 0, rotSpeed: 0,
+                    type: '', active: false
+                });
+            }
+        }
+
+        const count = skin.decor.count || 5;
+        const type = skin.decor.type;
+
+        // Activate and randomize
+        let activeCount = 0;
+        for (const item of this._skinDecorItems) {
+            if (activeCount >= count) {
+                item.active = false;
+                continue;
+            }
+
+            item.active = true;
+
+            // Handle Mixed Types
+            if (type === 'citron_mix') {
+                item.type = Math.random() < 0.6 ? 'lemon' : 'ginger';
+            } else {
+                item.type = type;
+            }
+
+            item.x = Math.random() * CONFIG.canvas.width;
+            item.y = Math.random() * CONFIG.canvas.height;
+            item.rot = Math.random() * Math.PI * 2;
+            item.speed = 0.5 + Math.random() * 1.5; // Slow float
+            item.rotSpeed = (Math.random() - 0.5) * 0.02;
+            activeCount++;
+        }
+    },
+
+    _drawSkinDecor(cx, W, H) {
+        if (!this._skinDecorItems || !this._skinDecorItems.length) return;
+
+        for (const item of this._skinDecorItems) {
+            if (!item.active) continue;
+
+            cx.save();
+            cx.translate(item.x, item.y);
+            cx.rotate(item.rot);
+            cx.globalAlpha = 0.6; // Subtle transparency
+
+            if (item.type === 'flower') {
+                // Draw Tiare Flower (Monoi) - Simplified
+                cx.fillStyle = '#ffffff';
+                // 5 petals
+                for (let i = 0; i < 5; i++) {
+                    cx.beginPath();
+                    cx.ellipse(0, -8, 4, 8, 0, 0, Math.PI * 2);
+                    cx.fill();
+                    cx.rotate((Math.PI * 2) / 5);
+                }
+                // Center
+                cx.fillStyle = '#ffeb3b';
+                cx.beginPath();
+                cx.arc(0, 0, 3, 0, Math.PI * 2);
+                cx.fill();
+            } else if (item.type === 'lemon') {
+                // Lemon Slice
+                cx.fillStyle = '#ffeb3b'; // Rind
+                cx.beginPath();
+                cx.arc(0, 0, 10, 0, Math.PI * 2);
+                cx.fill();
+
+                cx.fillStyle = '#fff9c4'; // Pith/Flesh
+                cx.beginPath();
+                cx.arc(0, 0, 8, 0, Math.PI * 2);
+                cx.fill();
+
+                // Segments
+                cx.strokeStyle = '#fbc02d';
+                cx.lineWidth = 0.5;
+                cx.beginPath();
+                for (let i = 0; i < 8; i++) {
+                    cx.moveTo(0, 0);
+                    cx.lineTo(Math.cos(i * Math.PI / 4) * 8, Math.sin(i * Math.PI / 4) * 8);
+                }
+                cx.stroke();
+
+            } else if (item.type === 'ginger') {
+                // Ginger Root (Irregular beige shape)
+                cx.fillStyle = '#e6cea3';
+                cx.beginPath();
+                cx.moveTo(-5, -5);
+                cx.quadraticCurveTo(0, -10, 5, -5);
+                cx.quadraticCurveTo(10, 0, 5, 8);
+                cx.quadraticCurveTo(0, 10, -5, 5);
+                cx.quadraticCurveTo(-10, 0, -5, -5);
+                cx.fill();
+
+                // Texture marks
+                cx.strokeStyle = '#d4b483';
+                cx.lineWidth = 1;
+                cx.beginPath();
+                cx.moveTo(-2, -2); cx.lineTo(2, -1);
+                cx.moveTo(-1, 2); cx.lineTo(3, 4);
+                cx.stroke();
+            } else if (item.type === 'safran') {
+                // Saffron Crocus Flower
+                // Purple petals
+                cx.fillStyle = '#b39ddb';
+                for (let i = 0; i < 5; i++) {
+                    cx.beginPath();
+                    cx.ellipse(0, -6, 3, 8, 0, 0, Math.PI * 2);
+                    cx.fill();
+                    cx.rotate(Math.PI * 2 / 5);
+                }
+
+                // Red Stigmas (The spice!)
+                cx.strokeStyle = '#d32f2f';
+                cx.lineWidth = 1.5;
+                cx.beginPath();
+                cx.moveTo(0, 0); cx.lineTo(-3, -6);
+                cx.moveTo(0, 0); cx.lineTo(3, -6);
+                cx.moveTo(0, 0); cx.lineTo(0, -8);
+                cx.stroke();
+
+                // Yellow Center
+                cx.fillStyle = '#ffeb3b';
+                cx.beginPath();
+                cx.arc(0, 0, 2, 0, Math.PI * 2);
+                cx.fill();
+            }
+
+            cx.restore();
+        }
+        cx.globalAlpha = 1;
+    },
+
+    _animateSkinDecor(dt) {
+        if (!this._skinDecorItems) return;
+
+        for (const item of this._skinDecorItems) {
+            if (!item.active) continue;
+
+            // Float upwards/sideways
+            item.y -= item.speed * dt;
+            item.rot += item.rotSpeed * dt;
+
+            // Wrap around
+            if (item.y < -30) {
+                item.y = CONFIG.canvas.height + 30;
+                item.x = Math.random() * CONFIG.canvas.width;
+            }
+        }
     }
 };

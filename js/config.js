@@ -83,9 +83,9 @@ const CONFIG = {
   // Skins
   skins: [
     // 0 Points (Defaults)
-    { id: 'monoi', name: 'Monoï', c1: '#fff0d5', c2: '#ffd19a', unlockAt: 0 },
-    { id: 'citron', name: 'Citron Gingembre', c1: '#fff9c4', c2: '#fbc02d', unlockAt: 0 }, // More Yellow
-    { id: 'safran', name: 'Safran', c1: '#ffccbc', c2: '#ff7043', unlockAt: 0 },           // More Reddish/Orange
+    { id: 'monoi', name: 'Monoï', c1: '#fff0d5', c2: '#ffd19a', unlockAt: 0, decor: { type: 'flower', count: 6, speed: 0.5 } },
+    { id: 'citron', name: 'Citron Gingembre', c1: '#fff9c4', c2: '#fbc02d', unlockAt: 0, decor: { type: 'citron_mix', count: 6, speed: 0.6 } }, // More Yellow
+    { id: 'safran', name: 'Safran', c1: '#ffccbc', c2: '#ff7043', unlockAt: 0, decor: { type: 'safran', count: 8, speed: 0.7 } },           // More Reddish/Orange
 
     // Unlockable Progression
     { id: 'cedre', name: 'Cèdre du Liban', c1: '#c7b299', c2: '#8e6e53', unlockAt: 5 },   // 5 pts
