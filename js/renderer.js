@@ -247,9 +247,8 @@ const Renderer = {
         const W = CONFIG.canvas.width;
         const H = CONFIG.canvas.height;
 
-        // Draw current theme background solid
-        cx.fillStyle = currentTheme.bg1;
-        cx.fillRect(0, 0, W, H);
+        // Draw Tiled Background
+        this._drawTiles(cx, W, H, currentTheme);
 
         // Night overlay (darken when it's real-world night time)
         if (this._isNight) {
@@ -263,13 +262,32 @@ const Renderer = {
         // Transition overlay (if needed)
         if (themeTrans < 1) {
             cx.globalAlpha = 1 - themeTrans;
-            cx.fillStyle = prevTheme.bg1;
-            cx.fillRect(0, 0, W, H);
+            this._drawTiles(cx, W, H, prevTheme);
+            cx.globalAlpha = 1;
 
             // Note: We don't draw prev theme decor to avoid visual clutter during fade
             // The new theme's decor (already drawn) will just fade in slightly obscured by the prev color layer
 
             cx.globalAlpha = 1;
+        }
+    },
+
+    _drawTiles(cx, W, H, theme) {
+        // Base (Grout)
+        cx.fillStyle = theme.bg1;
+        cx.fillRect(0, 0, W, H);
+
+        // Tiles
+        cx.fillStyle = theme.bg2;
+        const size = 32; // Sync with gridOffset
+        const offX = this._gridOffset % size;
+
+        // Draw tiles grid with parallax
+        for (let x = -offX; x < W + size; x += size) {
+            for (let y = 0; y < H; y += size) {
+                // Draw tile with 2px gap for grout
+                cx.fillRect(Math.round(x + 1), Math.round(y + 1), size - 2, size - 2);
+            }
         }
     },
 
@@ -347,20 +365,28 @@ const Renderer = {
         }
     },
 
-    // Draw ground (static - no animation for performance)
+    // Draw ground (Bathtub edge style)
     drawFoamGround() {
         const cx = this._ctx;
         const W = CONFIG.canvas.width;
         const H = CONFIG.canvas.height;
         const groundY = H - CONFIG.ground.height;
 
-        // Solid ground
-        cx.fillStyle = '#c8e0f0';
+        // Tub Body (Porcelain White/Ceramic)
+        cx.fillStyle = '#ffffff';
         cx.fillRect(0, groundY, W, CONFIG.ground.height);
 
-        // Simple wave top (static)
-        cx.fillStyle = '#dbeef8';
-        cx.fillRect(0, groundY, W, 12);
+        // Tub Top Lip (Shadow/Definition)
+        cx.fillStyle = '#e8eff5';
+        cx.fillRect(0, groundY, W, 15);
+
+        // Inner shadow line for 3D effect
+        cx.fillStyle = '#d0dbe5';
+        cx.fillRect(0, groundY + 15, W, 2);
+
+        // Bottom shade
+        cx.fillStyle = '#f5f9fc';
+        cx.fillRect(0, H - 25, W, 25);
     },
 
     // Draw pipes
@@ -383,21 +409,67 @@ const Renderer = {
                 const bottomH = Math.max(20, H - groundH - bottomY);
                 cx.drawImage(this._obstacleImg, px, bottomY, PIPE_W, bottomH);
             } else {
-                // Kraft paper style (solid color)
-                cx.fillStyle = '#c6a076';
+                // Blue Pipe Style (Bath theme)
+                const pipeColor = '#80d0f0'; // Light Cyan/Blue
+                const pipeShadow = '#5bb0d0'; // Darker Blue
+                const pipeHighlight = '#b0e8ff'; // Very light blue
+                const outlineColor = '#2c5c7c'; // Softer Dark Blue
 
-                this._roundRect(px, 0, PIPE_W, topH, 12, true);
-                this._roundRect(px, bottomY, PIPE_W, H - groundH - bottomY, 12, true);
+                // Set outline style once for the pipe
+                cx.strokeStyle = outlineColor;
+                cx.lineWidth = 2;
 
-                // Caps
-                cx.fillStyle = '#9e7a52';
-                cx.fillRect(px, topH - 8, PIPE_W, 8);
-                cx.fillRect(px, bottomY, PIPE_W, 8);
+                // Top Pipe Body
+                cx.fillStyle = pipeColor;
+                cx.fillRect(px, 0, PIPE_W, topH);
+                // Shading
+                cx.fillStyle = pipeShadow;
+                cx.fillRect(px + PIPE_W - 12, 0, 12, topH);
+                cx.fillStyle = pipeHighlight;
+                cx.fillRect(px + 10, 0, 8, topH);
+                // Body Outline (Left/Right)
+                cx.beginPath();
+                cx.moveTo(px, 0); cx.lineTo(px, topH);
+                cx.moveTo(px + PIPE_W, 0); cx.lineTo(px + PIPE_W, topH);
+                cx.stroke();
 
-                // Highlights
-                cx.fillStyle = '#ffffff3a';
-                cx.fillRect(px + 8, Math.max(8, topH * 0.35), PIPE_W - 16, 12);
-                cx.fillRect(px + 8, bottomY + (H - groundH - bottomY) * 0.2, PIPE_W - 16, 12);
+                // Top Pipe Rim (Cap) - Hanging down
+                const capH = 26;
+                const rimY = topH - capH;
+                cx.fillStyle = pipeColor;
+                cx.fillRect(px - 3, rimY, PIPE_W + 6, capH);
+                // Rim Details
+                cx.fillStyle = pipeShadow;
+                cx.fillRect(px + PIPE_W - 9, rimY, 12, capH);
+                cx.fillStyle = pipeHighlight;
+                cx.fillRect(px + 8, rimY, 8, capH);
+                // Outline Rim
+                cx.strokeRect(px - 3, rimY, PIPE_W + 6, capH);
+
+                // Bottom Pipe Body
+                const botH = H - groundH - bottomY;
+                cx.fillStyle = pipeColor;
+                cx.fillRect(px, bottomY, PIPE_W, botH);
+                // Shading
+                cx.fillStyle = pipeShadow;
+                cx.fillRect(px + PIPE_W - 12, bottomY, 12, botH);
+                cx.fillStyle = pipeHighlight;
+                cx.fillRect(px + 10, bottomY, 8, botH);
+                // Body Outline (Left/Right)
+                cx.beginPath();
+                cx.moveTo(px, bottomY); cx.lineTo(px, bottomY + botH);
+                cx.moveTo(px + PIPE_W, bottomY); cx.lineTo(px + PIPE_W, bottomY + botH);
+                cx.stroke();
+
+                // Bottom Pipe Rim (Cap)
+                cx.fillStyle = pipeColor;
+                cx.fillRect(px - 3, bottomY, PIPE_W + 6, capH);
+                // Rim Details
+                cx.fillStyle = pipeShadow;
+                cx.fillRect(px + PIPE_W - 9, bottomY, 12, capH);
+                cx.fillStyle = pipeHighlight;
+                cx.fillRect(px + 8, bottomY, 8, capH);
+                cx.strokeRect(px - 3, bottomY, PIPE_W + 6, capH);
             }
         }
     },
@@ -422,8 +494,9 @@ const Renderer = {
         cx.translate(Math.round(x), Math.round(y));
         cx.rotate(rot);
 
-        // Border for depth (skin-based color)
-        cx.strokeStyle = skin.c2;
+        // Border/Outline (Adaptive: Darker version of skin color)
+        // Mix skin.c2 with black (0.25) to get a natural contour
+        cx.strokeStyle = this._mixColor(skin.c2, '#000000', 0.25);
         cx.lineWidth = 1.5;
         this._roundRect(-w / 2, -h / 2, w, h, 10, false, true);
 
@@ -437,13 +510,17 @@ const Renderer = {
 
 
         // Text with slight shadow
-        cx.font = '700 6px Spinnaker, sans-serif';
+        cx.font = '800 7px Spinnaker, sans-serif'; // Bolder and slightly larger
         cx.textAlign = 'center';
         cx.textBaseline = 'middle';
-        cx.fillStyle = 'rgba(0,0,0,0.1)';
-        cx.fillText('SAVON YVARD', 0.5, 1.5);
-        cx.fillStyle = skin.c2;
-        cx.fillText('SAVON YVARD', 0, 1);
+        // Shadow/Engraved effect (lighter for depth)
+        cx.fillStyle = 'rgba(255,255,255,0.3)';
+        cx.fillText('SAVON YVARD', 0.5, 2);
+
+        // Main Text (Darker adaptive color for high contrast)
+        // Mix skin.c2 with 50% black to make it really pop while keeping tone
+        cx.fillStyle = this._mixColor(skin.c2, '#000000', 0.5);
+        cx.fillText('SAVON YVARD', 0, 1.5);
 
         cx.restore();
     },

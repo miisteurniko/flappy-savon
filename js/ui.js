@@ -577,6 +577,12 @@ const UI = {
                         'Top Joueurs (Général)';
                 }
 
+                // Toggle subtitle (User request: hide for General)
+                const subtitle = document.getElementById('lbSubtitle');
+                if (subtitle) {
+                    subtitle.style.display = type === 'contest' ? 'block' : 'none';
+                }
+
                 // Show loading
                 this.setLeaderboardLoading();
 

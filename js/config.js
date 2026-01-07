@@ -72,7 +72,7 @@ const CONFIG = {
 
   // Themes (unlocked by score) - Brand colors progression
   themes: [
-    { id: 'savonnerie', from: 0, bg1: '#f5f0e8', bg2: '#ebe4d8', fog: 0, leaves: 2, bubbleMul: 1 },      // Crème (départ)
+    { id: 'savonnerie', from: 0, bg1: '#d0e8f0', bg2: '#b0d8e8', fog: 0, leaves: 2, bubbleMul: 1 },      // Salle de bain (Bleu/Cyan)
     { id: 'atelier', from: 10, bg1: '#e8e4d8', bg2: '#d5cfc2', fog: 0, leaves: 2, bubbleMul: 1 },        // Beige
     { id: 'lavande', from: 20, bg1: '#e8e0f0', bg2: '#d0c5e5', fog: 0, leaves: 3, bubbleMul: 1.1 },      // Lavande
     { id: 'hammam', from: 30, bg1: '#d5e8e8', bg2: '#b8d5d5', fog: 1, leaves: 3, bubbleMul: 1.2 },       // Bleu hammam

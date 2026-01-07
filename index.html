@@ -14,7 +14,7 @@
     <meta property="og:description" content="Jouez et gagnez des savons artisanaux !" />
     <meta property="og:type" content="website" />
     <link rel="manifest" href="manifest.json" />
-    <link rel="apple-touch-icon" href="assets/icon-192.png" />
+    <link rel="apple-touch-icon" href="assets/app-icon.png" />
     <title>Flappy Savon – Concours Savon Yvard</title>
     <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -191,6 +191,10 @@
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
+            <div style="margin-bottom: 20px;">
+                <img src="assets/app-icon.png" alt="App Icon"
+                    style="width: 64px; height: 64px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: inline-block;">
+            </div>
             <h2>Installer sur iPhone</h2>
             <p style="margin-bottom: 20px;">Pour avoir le jeu en plein écran :</p>
             <ol
@@ -312,7 +316,7 @@
                 </div>
                 <h3 id="lbTitle" style="margin: 10px 0 5px; font-size: 16px; color: #2c2420;">🏆 Top Joueurs (Concours)
                 </h3>
-                <p class="muted" style="margin-bottom: 20px; font-size: 13px;">
+                <p id="lbSubtitle" class="muted" style="margin-bottom: 20px; font-size: 13px;">
                     Les 3 premiers gagnent des cadeaux ! 🎁
                 </p>
                 <div id="modalLeaderboard" class="modal-leaderboard" style="text-align: left;">
