@@ -307,8 +307,8 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[24px] md:rounded-[32px] p-5 md:p-8 w-full max-w-lg shadow-2xl transform transition-all mx-4 md:mx-0 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200 p-4">
+      <div className="bg-white rounded-[24px] md:rounded-[32px] p-5 md:p-8 w-full max-w-lg shadow-2xl transform transition-all max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between mb-6 md:mb-8 shrink-0">
           <div>
             <h2 className="text-xl md:text-2xl font-bold text-gray-900">Configuration Concours</h2>
