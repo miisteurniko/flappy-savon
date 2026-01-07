@@ -307,22 +307,22 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[32px] p-8 max-w-lg w-full shadow-2xl scale-100 transform transition-all">
-        <div className="flex items-center justify-between mb-8">
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-[24px] md:rounded-[32px] p-5 md:p-8 w-full max-w-lg shadow-2xl transform transition-all mx-4 md:mx-0 max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between mb-6 md:mb-8 shrink-0">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Configuration Concours</h2>
-            <p className="text-gray-500 text-sm mt-1">Définez la période active du jeu</p>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Configuration Concours</h2>
+            <p className="text-gray-500 text-xs md:text-sm mt-1">Définez la période active du jeu</p>
           </div>
-          <div className="p-3 bg-amber-100 text-amber-600 rounded-2xl">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+          <div className="p-2 md:p-3 bg-amber-100 text-amber-600 rounded-2xl">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div></div>
         ) : (
-          <div className="space-y-6 overflow-y-auto max-h-[70vh] pr-2">
+          <div className="space-y-6 overflow-y-auto pr-2 flex-1 min-h-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Date de début</label>
@@ -501,17 +501,17 @@ function ConfigModal({ onClose, onSave }: { onClose: () => void; onSave: () => v
           </div>
         )}
 
-        <div className="flex gap-3 justify-end mt-10">
+        <div className="flex gap-3 justify-end mt-6 md:mt-10 pt-4 border-t border-gray-50 shrink-0">
           <button
             onClick={onClose}
-            className="px-6 py-3 text-gray-500 font-semibold hover:bg-gray-50 rounded-xl transition"
+            className="px-4 md:px-6 py-3 text-gray-500 font-semibold hover:bg-gray-50 rounded-xl transition text-sm md:text-base"
           >
             Annuler
           </button>
           <button
             onClick={handleSave}
             disabled={saving || loading}
-            className="px-6 py-3 bg-[#1A1A1A] text-white font-semibold rounded-xl hover:bg-black transition flex items-center gap-2 shadow-lg shadow-gray-200 disabled:opacity-50"
+            className="px-4 md:px-6 py-3 bg-[#1A1A1A] text-white font-semibold rounded-xl hover:bg-black transition flex items-center gap-2 shadow-lg shadow-gray-200 disabled:opacity-50 text-sm md:text-base"
           >
             {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
             {saving ? 'Sauvegarde...' : 'Enregistrer'}
