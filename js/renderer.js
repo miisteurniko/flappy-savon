@@ -110,8 +110,6 @@ const Renderer = {
         const smoothDt = Math.min(dt, 1.5);
 
         this._t++;
-        this._gridOffset += 0.15 * smoothDt;
-        if (this._gridOffset > 32) this._gridOffset -= 32;
 
         // Decay shake
         if (this._shake > 0.5) {
@@ -206,6 +204,7 @@ const Renderer = {
                     c.vx = -(Math.random() * 1 + 1) * speed;
                     c.flap = 0;
                     c.t = 0;
+                    c.vx = -(Math.random() * 1 + 1) * speed; // Fix duplicate
                 }
                 break;
             }
@@ -247,8 +246,8 @@ const Renderer = {
         const W = CONFIG.canvas.width;
         const H = CONFIG.canvas.height;
 
-        // Draw Tiled Background
-        this._drawTiles(cx, W, H, currentTheme);
+        // Draw Cached/Simple Background (Gradient instead of tiles)
+        this._drawSimpleBackground(cx, W, H, currentTheme);
 
         // Night overlay (darken when it's real-world night time)
         if (this._isNight) {
@@ -262,7 +261,7 @@ const Renderer = {
         // Transition overlay (if needed)
         if (themeTrans < 1) {
             cx.globalAlpha = 1 - themeTrans;
-            this._drawTiles(cx, W, H, prevTheme);
+            this._drawSimpleBackground(cx, W, H, prevTheme);
             cx.globalAlpha = 1;
 
             // Note: We don't draw prev theme decor to avoid visual clutter during fade
@@ -272,23 +271,15 @@ const Renderer = {
         }
     },
 
-    _drawTiles(cx, W, H, theme) {
-        // Base (Grout)
-        cx.fillStyle = theme.bg1;
+    _drawSimpleBackground(cx, W, H, theme) {
+        // Optimized: Vertical Gradient instead of 600+ tile rects
+        // Reuse canvas gradient if possible? For now, creation is cheap enough vs rects
+        const grad = cx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, theme.bg1);
+        grad.addColorStop(1, theme.bg2);
+
+        cx.fillStyle = grad;
         cx.fillRect(0, 0, W, H);
-
-        // Tiles
-        cx.fillStyle = theme.bg2;
-        const size = 32; // Sync with gridOffset
-        const offX = this._gridOffset % size;
-
-        // Draw tiles grid with parallax
-        for (let x = -offX; x < W + size; x += size) {
-            for (let y = 0; y < H; y += size) {
-                // Draw tile with 2px gap for grout
-                cx.fillRect(Math.round(x + 1), Math.round(y + 1), size - 2, size - 2);
-            }
-        }
     },
 
     _drawDecor(cx, W, H, theme) {
@@ -487,6 +478,12 @@ const Renderer = {
             grad.addColorStop(0, this._cachedSkin.c1);
             grad.addColorStop(1, this._cachedSkin.c2);
             this._cachedGradient = grad;
+
+            // Cache colors (Mix once)
+            // Border: Mix skin.c2 with black (0.25)
+            this._cachedOutlineColor = this._mixColor(this._cachedSkin.c2, '#000000', 0.25);
+            // Text: Mix skin.c2 with black (0.5)
+            this._cachedTextColor = this._mixColor(this._cachedSkin.c2, '#000000', 0.5);
         }
         const skin = this._cachedSkin;
 
@@ -495,8 +492,7 @@ const Renderer = {
         cx.rotate(rot);
 
         // Border/Outline (Adaptive: Darker version of skin color)
-        // Mix skin.c2 with black (0.25) to get a natural contour
-        cx.strokeStyle = this._mixColor(skin.c2, '#000000', 0.25);
+        cx.strokeStyle = this._cachedOutlineColor;
         cx.lineWidth = 1.5;
         this._roundRect(-w / 2, -h / 2, w, h, 10, false, true);
 
@@ -517,9 +513,8 @@ const Renderer = {
         cx.fillStyle = 'rgba(255,255,255,0.3)';
         cx.fillText('SAVON YVARD', 0.5, 2);
 
-        // Main Text (Darker adaptive color for high contrast)
-        // Mix skin.c2 with 50% black to make it really pop while keeping tone
-        cx.fillStyle = this._mixColor(skin.c2, '#000000', 0.5);
+        // Main Text (Cached adaptive color)
+        cx.fillStyle = this._cachedTextColor;
         cx.fillText('SAVON YVARD', 0, 1.5);
 
         cx.restore();
