@@ -166,6 +166,79 @@ const UI = {
         this.el.unlockModal.setAttribute('aria-hidden', 'true');
     },
 
+    // === PROMO UNLOCK MODAL ===
+
+    showPromoUnlock(discount) {
+        const modal = document.getElementById('promoModal');
+        const discountEl = document.getElementById('promoDiscount');
+        const okBtn = document.getElementById('promoOkBtn');
+        const connectedView = document.getElementById('promoConnectedView');
+        const guestView = document.getElementById('promoGuestView');
+        const registerBtn = document.getElementById('promoRegisterBtn');
+        const laterBtn = document.getElementById('promoLaterBtn');
+
+        if (!modal) return;
+
+        // Set discount text
+        if (discountEl) discountEl.textContent = discount;
+
+        // Check if user is connected (has email)
+        const hasEmail = !!localStorage.getItem('email');
+
+        // Show appropriate view
+        if (connectedView) connectedView.style.display = hasEmail ? 'block' : 'none';
+        if (guestView) guestView.style.display = hasEmail ? 'none' : 'block';
+
+        // Handler for OK button (connected users)
+        if (okBtn) {
+            okBtn.onclick = () => {
+                this.closePromoModal();
+            };
+        }
+
+        // Handler for Register button (guests)
+        if (registerBtn) {
+            registerBtn.onclick = () => {
+                this.closePromoModal();
+                this.openIdentityModal('register');
+            };
+        }
+
+        // Handler for Later button (guests)
+        if (laterBtn) {
+            laterBtn.onclick = () => {
+                this.closePromoModal();
+            };
+        }
+
+        // Restart confetti animation by cloning nodes
+        const confettiContainer = document.getElementById('promoConfetti');
+        if (confettiContainer) {
+            const spans = confettiContainer.querySelectorAll('span');
+            spans.forEach(span => {
+                const newSpan = span.cloneNode(true);
+                span.parentNode.replaceChild(newSpan, span);
+            });
+        }
+
+        // Show modal
+        modal.classList.add('open', 'unlocking');
+        modal.setAttribute('aria-hidden', 'false');
+
+        // Remove animation class after a while
+        setTimeout(() => {
+            modal.classList.remove('unlocking');
+        }, 3000);
+    },
+
+    closePromoModal() {
+        const modal = document.getElementById('promoModal');
+        if (modal) {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    },
+
     // === TABS LOGIC ===
 
     // Update score display
@@ -363,6 +436,30 @@ const UI = {
         // Validate fields with specific error messages
         if (!pseudo || !email) {
             this.showToast('Renseigne ton pseudo et ton e-mail pour participer.');
+            return false;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            this.showToast('⚠️ Le format de l\'e-mail n\'est pas valide.');
+            // Highlight the email input visually
+            const emailRow = this.el.emailInput.closest('.row');
+            if (emailRow) {
+                emailRow.classList.add('shake');
+                setTimeout(() => emailRow.classList.remove('shake'), 600);
+            }
+            // Add error styling to input
+            this.el.emailInput.style.borderColor = '#e74c3c';
+            this.el.emailInput.style.boxShadow = '0 0 0 3px rgba(231, 76, 60, 0.2)';
+            setTimeout(() => {
+                this.el.emailInput.style.borderColor = '';
+                this.el.emailInput.style.boxShadow = '';
+            }, 2000);
+            // Track failed attempt
+            if (typeof Analytics !== 'undefined') {
+                Analytics.track('registration_attempt', { success: false, error: 'invalid_email' });
+            }
             return false;
         }
 

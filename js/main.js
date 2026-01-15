@@ -231,8 +231,8 @@
     // Identity modal - Save button (saves and closes)
     const saveBtn = document.getElementById('idSaveBtn');
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            const ok = UI.saveIdentity();
+        saveBtn.addEventListener('click', async () => {
+            const ok = await UI.saveIdentity();
             if (ok) {
                 localStorage.setItem('flappySavonOnboarded', '1');
                 UI.closeIdentityModal();
@@ -388,11 +388,15 @@
         }
 
         // 🎁 Check for promo code threshold unlocks
-        const promoThresholds = [10, 20, 30];
-        for (const threshold of promoThresholds) {
-            if (previousBest < threshold && best >= threshold) {
+        const promoThresholds = [
+            { score: 10, discount: '-10%' },
+            { score: 20, discount: '-15%' },
+            { score: 30, discount: '-20%' }
+        ];
+        for (const promo of promoThresholds) {
+            if (previousBest < promo.score && best >= promo.score) {
                 setTimeout(() => {
-                    UI.showToast(`🎁 Code promo débloqué ! Tu vas le recevoir par email ✉️`);
+                    UI.showPromoUnlock(promo.discount);
                     Particles.spawnConfetti();
                 }, 1500); // Show after the new record toast
                 break; // Only show one notification per game

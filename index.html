@@ -416,6 +416,44 @@
         </div>
     </div>
 
+    <!-- Promo Code Unlock Modal -->
+    <div id="promoModal" class="modal" aria-hidden="true">
+        <div class="card" style="text-align: center; padding-top: 40px;">
+            <!-- Confetti container -->
+            <div class="unlock-confetti" id="promoConfetti">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div style="font-size: 64px; margin-bottom: 16px; position: relative; z-index: 2;">🎁</div>
+            <h2 style="font-size: 24px; margin-bottom: 6px; position: relative; z-index: 2;">Code Promo Débloqué !</h2>
+            <p id="promoDiscount"
+                style="font-size: 32px; font-weight: 700; margin-bottom: 8px; color: #d4a037; position: relative; z-index: 2;">
+                -10%</p>
+
+            <!-- View for connected users -->
+            <div id="promoConnectedView" style="position: relative; z-index: 2;">
+                <p style="font-size: 15px; margin-bottom: 24px; color: var(--muted);">
+                    📧 Tu vas recevoir ton code<br>directement par email !
+                </p>
+                <button id="promoOkBtn" class="btn full">Super ! 🎉</button>
+            </div>
+
+            <!-- View for guests (not connected) -->
+            <div id="promoGuestView" style="display: none; position: relative; z-index: 2;">
+                <p style="font-size: 15px; margin-bottom: 24px; color: var(--muted);">
+                    ⚠️ Inscris-toi pour recevoir<br>ton code promo par email !
+                </p>
+                <button id="promoRegisterBtn" class="btn full"
+                    style="background: linear-gradient(135deg, #d4a037, #b8860b);">
+                    ✉️ M'inscrire pour recevoir mon code
+                </button>
+                <button id="promoLaterBtn" class="skip-link" style="margin-top: 12px;">Plus tard</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Modal -->
     <div id="statsModal" class="modal" aria-hidden="true">
         <div class="card">
