@@ -387,6 +387,18 @@
             UI.showToast('🎉 Nouveau record !');
         }
 
+        // 🎁 Check for promo code threshold unlocks
+        const promoThresholds = [10, 20, 30];
+        for (const threshold of promoThresholds) {
+            if (previousBest < threshold && best >= threshold) {
+                setTimeout(() => {
+                    UI.showToast(`🎁 Code promo débloqué ! Tu vas le recevoir par email ✉️`);
+                    Particles.spawnConfetti();
+                }, 1500); // Show after the new record toast
+                break; // Only show one notification per game
+            }
+        }
+
         // Check for skin unlocks
         for (const s of CONFIG.skins) {
             if (s.unlockAt > 0 && previousBest < s.unlockAt && best >= s.unlockAt) {
